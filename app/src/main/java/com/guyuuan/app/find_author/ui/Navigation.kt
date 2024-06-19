@@ -17,20 +17,29 @@
 package com.guyuuan.app.find_author.ui
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.guyuuan.app.find_author.core.ui.compoments.AppRoute
+import com.guyuuan.app.find_author.core.ui.locals.LocalNavController
 import com.guyuuan.app.find_author.feature.home.ui.HomeScreen
+import com.guyuuan.app.find_author.feature.home.ui.screen.ChooseBucketsScreen
 
 @Composable
-fun MainNavigation() {
-    val navController = rememberNavController()
+fun MainNavigation(modifier:Modifier,navController: NavHostController) {
 
-    NavHost(navController = navController, startDestination = "main") {
-        composable("main") { HomeScreen(modifier = Modifier.padding(16.dp)) }
-        // TODO: Add more destinations
+    CompositionLocalProvider(LocalNavController provides navController) {
+            NavHost(
+                modifier = modifier,
+                navController = navController,
+                startDestination = AppRoute.CHOOSE_BUCKETS.route
+            ) {
+                composable(AppRoute.HOME.route) { HomeScreen() }
+                composable(AppRoute.CHOOSE_BUCKETS.route) { ChooseBucketsScreen() }
+            }
     }
 }

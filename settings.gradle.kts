@@ -15,6 +15,7 @@
  */
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         gradlePluginPortal()
         google()
@@ -27,13 +28,18 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
     }
+    versionCatalogs {
+        create("libs") {
+            from(files("./build-logic/libs.versions.toml"))
+        }
+    }
 }
 rootProject.name = "FindAuthor"
 
 include(":app")
-include(":core-data")
-include(":core-database")
-include(":core-testing")
-include(":core-ui")
-include(":feature-home")
-include(":test-app")
+include(":core:data")
+include(":core:database")
+include(":core:testing")
+include(":core:ui")
+include(":feature:home")
+//include(":test-app")

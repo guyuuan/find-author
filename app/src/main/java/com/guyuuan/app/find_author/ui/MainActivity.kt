@@ -17,14 +17,18 @@
 package com.guyuuan.app.find_author.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import com.guyuuan.app.find_author.core.ui.base.MyApplicationTheme
+import com.guyuuan.app.find_author.core.ui.compoments.App
 import dagger.hilt.android.AndroidEntryPoint
-import com.guyuuan.app.find_author.core.ui.MyApplicationTheme
+import timber.log.Timber
+import java.io.StringReader
+
+private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -33,11 +37,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainNavigation()
+                App { padding, navController ->
+                    MainNavigation(
+                        navController = navController,
+                        modifier = Modifier.padding(padding)
+                    )
                 }
             }
         }

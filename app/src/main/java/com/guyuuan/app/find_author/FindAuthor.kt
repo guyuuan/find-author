@@ -17,7 +17,28 @@
 package com.guyuuan.app.find_author
 
 import android.app.Application
+import android.os.Build.VERSION.SDK_INT
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 @HiltAndroidApp
-class FindAuthor : Application()
+class FindAuthor : Application(),ImageLoaderFactory{
+    override fun onCreate() {
+        super.onCreate()
+        Timber.plant(Timber.DebugTree())
+    }
+
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this).components {
+            if (SDK_INT >= 28) {
+                add(ImageDecoderDecoder.Factory())
+            } else {
+                add(GifDecoder.Factory())
+            }
+        }.build()
+    }
+}

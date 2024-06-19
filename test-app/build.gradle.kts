@@ -52,17 +52,17 @@ android {
 
 dependencies {
     implementation(project(":app"))
-    implementation(project(":core-data"))
-    implementation(project(":core-testing"))
-    implementation(project(":feature-home"))
+    implementation(project(":core:data"))
+    implementation(project(":core:testing"))
+    implementation(project(":feature:home"))
 
     // Testing
     implementation(libs.androidx.test.core)
 
     // Hilt and instrumented tests.
     implementation(libs.hilt.android.testing)
-    kapt(libs.hilt.android.compiler)
+    kapt(libs.hilt.compiler)
 
     // Compose
-    implementation(libs.androidx.compose.ui.test.junit4)
+    implementation(libs.androidx.compose.ui.test)
 }

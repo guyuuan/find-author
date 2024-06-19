@@ -16,4 +16,5 @@
   -->
 
 <resources>
+    <color name="translation">#00000000</color>
 </resources>
