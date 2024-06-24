@@ -1,4 +1,4 @@
-package com.guyuuan.app.find_author.feature.home.ui.screen
+package com.guyuuan.app.find_author.ui.screen.bucket
 
 import androidx.lifecycle.viewModelScope
 import com.guyuuan.app.find_author.core.data.MediaRepository

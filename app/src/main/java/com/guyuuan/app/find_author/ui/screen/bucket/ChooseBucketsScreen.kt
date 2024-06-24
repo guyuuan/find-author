@@ -1,7 +1,6 @@
-package com.guyuuan.app.find_author.feature.home.ui.screen
+package com.guyuuan.app.find_author.ui.screen.bucket
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import timber.log.Timber
 
 /**
@@ -33,9 +35,13 @@ import timber.log.Timber
  * @description:
  **/
 
+@Destination<RootGraph>(
+//    start = true
+)
 @Composable
 fun ChooseBucketsScreen(
-    modifier: Modifier = Modifier, viewModel: ChooseBucketsViewModel = hiltViewModel()
+    viewModel: ChooseBucketsViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator
 ) {
     val uiState by viewModel.uiStat.collectAsStateWithLifecycle()
     AnimatedContent(targetState = uiState, label = "chooseBuckets") { state ->
@@ -51,7 +57,7 @@ fun ChooseBucketsScreen(
 
             is ChooseBucketsUiState.Loading -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    LinearProgressIndicator(modifier.align(Alignment.Center))
+                    LinearProgressIndicator(Modifier.align(Alignment.Center))
                 }
             }
 

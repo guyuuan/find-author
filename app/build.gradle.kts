@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootPlugin.Companion.kotlinBinaryenExtension
+
 /*
  * Copyright (C) 2022 The Android Open Source Project
  *
@@ -39,15 +41,15 @@ android {
     buildTypes {
         val debug by getting {
             try {
-                signingConfig= signingConfigs.getByName("chitanda")
+                signingConfig = signingConfigs.getByName("chitanda")
             } catch (_: Throwable) {
             }
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"),"proguard-rules.pro")
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
         val release by getting {
             isMinifyEnabled = true
             try {
-               signingConfig= signingConfigs.getByName("chitanda")
+                signingConfig = signingConfigs.getByName("chitanda")
             } catch (_: Throwable) {
 
             }
@@ -70,8 +72,6 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
-    implementation(project(":feature:home"))
-
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -99,5 +99,9 @@ dependencies {
 
     implementation(libs.timber)
     implementation(libs.coil.kt)
+    implementation(libs.coil.compose)
     implementation(libs.coil.kt.gif)
+    implementation(libs.accompanist.permissions)
+    ksp(libs.compose.destinations.ksp)
+    implementation(libs.chitanda.dynamicstatusbar)
 }

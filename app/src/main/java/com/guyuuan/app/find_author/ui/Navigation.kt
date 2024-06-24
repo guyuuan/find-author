@@ -16,30 +16,18 @@
 
 package com.guyuuan.app.find_author.ui
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import com.guyuuan.app.find_author.core.ui.compoments.AppRoute
 import com.guyuuan.app.find_author.core.ui.locals.LocalNavController
-import com.guyuuan.app.find_author.feature.home.ui.HomeScreen
-import com.guyuuan.app.find_author.feature.home.ui.screen.ChooseBucketsScreen
+import com.ramcosta.composedestinations.DestinationsNavHost
+import com.ramcosta.composedestinations.generated.NavGraphs
 
 @Composable
-fun MainNavigation(modifier:Modifier,navController: NavHostController) {
+fun MainNavigation(modifier: Modifier, navController: NavHostController) {
 
     CompositionLocalProvider(LocalNavController provides navController) {
-            NavHost(
-                modifier = modifier,
-                navController = navController,
-                startDestination = AppRoute.CHOOSE_BUCKETS.route
-            ) {
-                composable(AppRoute.HOME.route) { HomeScreen() }
-                composable(AppRoute.CHOOSE_BUCKETS.route) { ChooseBucketsScreen() }
-            }
+        DestinationsNavHost(NavGraphs.root, modifier = modifier)
     }
 }

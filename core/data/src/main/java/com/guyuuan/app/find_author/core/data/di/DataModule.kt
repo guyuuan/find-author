@@ -16,10 +16,12 @@
 
 package com.guyuuan.app.find_author.core.data.di
 
+import com.guyuuan.app.find_author.core.data.AppConfigRepository
 import com.guyuuan.app.find_author.core.data.BucketRepository
 import com.guyuuan.app.find_author.core.data.DefaultBucketRepository
 import com.guyuuan.app.find_author.core.data.DefaultImageRepository
 import com.guyuuan.app.find_author.core.data.DefaultMediaRepository
+import com.guyuuan.app.find_author.core.data.FakeAppConfigRepository
 import com.guyuuan.app.find_author.core.data.ImageRepository
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.media.AndroidMediaStoreScanner
@@ -57,6 +59,12 @@ interface DataModule {
     fun bindsMediaRepository(
         mediaRepository: DefaultMediaRepository
     ): MediaRepository
+
+    @Singleton
+    @Binds
+    fun bindAppConfigRepository(
+        appConfigRepository: FakeAppConfigRepository
+    ): AppConfigRepository
 }
 
 //class FakeHomeRepository @Inject constructor() : HomeRepository {

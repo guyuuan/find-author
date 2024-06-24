@@ -17,7 +17,6 @@
 package com.guyuuan.app.find_author.feature.home.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,8 +46,11 @@ import coil.compose.AsyncImage
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.ui.base.MyApplicationTheme
 import com.guyuuan.app.find_author.feature.home.ui.HomeUiState.Success
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.annotation.RootGraph
 import kotlinx.datetime.Instant
 
+@Destination<RootGraph>()
 @Composable
 fun HomeScreen( viewModel: HomeViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

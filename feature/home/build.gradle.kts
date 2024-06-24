@@ -16,8 +16,7 @@
 
 @Suppress("DSL_SCOPE_VIOLATION") // Remove when fixed https://youtrack.jetbrains.com/issue/KTIJ-19369
 plugins {
-    alias(libs.plugins.chitanda.android.lib.compose)
-    alias(libs.plugins.chitanda.android.lib)
+    alias(libs.plugins.chitanda.android.feature)
     alias(libs.plugins.kotlin.kapt)
 }
 
@@ -39,17 +38,17 @@ dependencies {
     androidTestImplementation(project(":core:testing"))
 
     // Core Android dependencies
-    implementation(libs.androidx.activity.compose)
+//    implementation(libs.androidx.activity.compose)
 
     // Arch Components
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.hilt.navigation.compose)
+//    implementation(libs.androidx.lifecycle.runtime.compose)
+//    implementation(libs.androidx.lifecycle.runtime.ktx)
+//    implementation(libs.androidx.lifecycle.viewmodel.compose)
+//    implementation(libs.androidx.hilt.navigation.compose)
 
     // Compose
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.tooling.preview)
+//    implementation(libs.androidx.compose.ui)
+//    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     // Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -58,8 +57,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Hilt Dependency Injection
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+//    implementation(libs.hilt.android)
+//    kapt(libs.hilt.compiler)
     // Hilt and instrumented tests.
     androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.compiler)
@@ -78,4 +77,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.datetime)
     implementation(libs.androidx.paging3.compose)
+    ksp(libs.compose.destinations.ksp)
 }

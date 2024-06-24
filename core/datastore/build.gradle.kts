@@ -17,26 +17,43 @@
 @Suppress("DSL_SCOPE_VIOLATION") // Remove when fixed https://youtrack.jetbrains.com/issue/KTIJ-19369
 plugins {
     alias(libs.plugins.chitanda.android.lib)
+    alias(libs.plugins.protobuf)
     alias(libs.plugins.kotlin.kapt)
 }
 
 android {
-    namespace = "com.guyuuan.app.find_author.core.data"
+    namespace = "com.guyuuan.app.find_author.core.datastore"
 }
 
-dependencies {
-    implementation(project(":core:database"))
-    implementation(project(":core:datastore"))
+protobuf{
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                register("java") {
+                    option("lite")
+                }
+                register("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
 
-    // Arch Components
+androidComponents.beforeVariants {
+    android.sourceSets.getByName(it.name) {
+        val buildDir = layout.buildDirectory.get().asFile
+        java.srcDir(buildDir.resolve("generated/source/proto/${it.name}/java"))
+        kotlin.srcDir(buildDir.resolve("generated/source/proto/${it.name}/kotlin"))
+    }
+}
+
+dependencies{
+    api(libs.androidx.dataStore.proto)
+    api(libs.protobuf.kotlin.lite)
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
-
-    implementation(libs.kotlinx.coroutines.android)
-
-    // Local tests: jUnit, coroutines, Android runner
-    testImplementation(libs.junit4)
-    testImplementation(libs.kotlinx.coroutines.test)
-    implementation(libs.androidx.paging3.runtime)
-//    implementation(libs.androidx.dataStore.proto)
 }
