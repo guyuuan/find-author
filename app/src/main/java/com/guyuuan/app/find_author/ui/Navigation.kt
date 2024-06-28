@@ -27,7 +27,7 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 @Composable
 fun MainNavigation(modifier: Modifier, navController: NavHostController) {
 
-    CompositionLocalProvider(LocalNavController provides navController) {
+//    CompositionLocalProvider(LocalNavController provides navController) {
         DestinationsNavHost(NavGraphs.root, modifier = modifier)
-    }
+//    }
 }

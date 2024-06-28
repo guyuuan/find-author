@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.ui.BaseViewModel
+import com.guyuuan.app.find_author.core.ui.UiEvent
+import com.guyuuan.app.find_author.core.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,17 +36,17 @@ class ChooseBucketsViewModel @Inject constructor(
         }
     }
 
-    override fun onEvent(event: SelectBucketsEvent) {
+    override suspend fun onEvent(event: SelectBucketsEvent) {
     }
 
 }
 
-sealed interface ChooseBucketsUiState {
+sealed interface ChooseBucketsUiState: UiState {
     data object Loading : ChooseBucketsUiState
     data class Success(val buckets: List<BucketItem>) : ChooseBucketsUiState
     data class Error(val error: Throwable) : ChooseBucketsUiState
 }
 
-sealed interface SelectBucketsEvent {
+sealed interface SelectBucketsEvent:UiEvent {
 
 }

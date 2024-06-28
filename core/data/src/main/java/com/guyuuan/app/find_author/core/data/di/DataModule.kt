@@ -18,6 +18,7 @@ package com.guyuuan.app.find_author.core.data.di
 
 import com.guyuuan.app.find_author.core.data.AppConfigRepository
 import com.guyuuan.app.find_author.core.data.BucketRepository
+import com.guyuuan.app.find_author.core.data.DefaultAppConfigRepository
 import com.guyuuan.app.find_author.core.data.DefaultBucketRepository
 import com.guyuuan.app.find_author.core.data.DefaultImageRepository
 import com.guyuuan.app.find_author.core.data.DefaultMediaRepository
@@ -63,7 +64,7 @@ interface DataModule {
     @Singleton
     @Binds
     fun bindAppConfigRepository(
-        appConfigRepository: FakeAppConfigRepository
+        appConfigRepository: DefaultAppConfigRepository
     ): AppConfigRepository
 }
 

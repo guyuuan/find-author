@@ -19,6 +19,7 @@ interface BucketRepository {
     suspend fun updateBucket(vararg bucket: BucketItem)
     fun getAllBuckets(): Flow<List<BucketItem>>
     suspend fun getBucket(bucketId: Long): BucketItem?
+    fun getSelectedBuckets(): Flow<List<BucketItem>>
 }
 
 class DefaultBucketRepository @Inject constructor(
@@ -47,5 +48,11 @@ class DefaultBucketRepository @Inject constructor(
 
     override suspend fun getBucket(bucketId: Long) =
         bucketDao.getBucket(bucketId)?.toBucketItem()
+
+    override fun getSelectedBuckets() = bucketDao.getSelectedBuckets().map { buckets ->
+        buckets.map {
+            it.toBucketItem()
+        }
+    }
 }
 

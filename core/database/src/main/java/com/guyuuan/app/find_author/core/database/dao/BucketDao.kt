@@ -30,4 +30,7 @@ interface BucketDao {
 
     @Update
     suspend fun updateBucket(vararg item: Bucket)
+
+    @Query("SELECT * FROM bucket WHERE selected = 1 ORDER BY modifiedDate DESC")
+     fun getSelectedBuckets(): Flow<List<Bucket>>
 }
