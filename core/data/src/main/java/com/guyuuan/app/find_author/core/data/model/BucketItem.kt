@@ -2,6 +2,7 @@ package com.guyuuan.app.find_author.core.data.model
 
 import android.content.ContentUris
 import android.provider.MediaStore
+import com.guyuuan.app.find_author.core.database.model.BucketType
 
 /**
  * @author: Chen
@@ -11,14 +12,10 @@ import android.provider.MediaStore
 data class BucketItem(
     val id: Long,
     val name: String,
+    val uri:String?=null,
     val relativePath: String,
-    val coverId: Long?,
     val selected: Boolean = false,
-    val modifiedDate:Long
-) {
-    val coverUri = coverId?.let {
-        ContentUris.withAppendedId(
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI, it
-        )
-    }
-}
+    val modifiedDate:Long,
+    val coverUri:String?,
+    val type:BucketType
+)

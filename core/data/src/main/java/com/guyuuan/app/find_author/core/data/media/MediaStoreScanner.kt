@@ -3,9 +3,11 @@ package com.guyuuan.app.find_author.core.data.media
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.net.Uri
 import android.provider.MediaStore
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.database.model.BucketType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
@@ -18,20 +20,36 @@ import javax.inject.Inject
  * @createTime: 6/6/24 17:50
  * @description:
  **/
+interface MediaScanner : MediaStoreScanner, SAFMediaScanner, ShizukuMediaScanner
+
+class DefaultMediaScanner @Inject constructor(
+    mediaStore: MediaStoreScanner, saf: SAFMediaScanner, shizuku: ShizukuMediaScanner
+) : MediaScanner, MediaStoreScanner by mediaStore, SAFMediaScanner by saf,
+    ShizukuMediaScanner by shizuku
+
 
 interface MediaStoreScanner {
 
 
-    fun scanBucketImages(bucketId: Long): Flow<ImageItem>
+    fun scanMediaStoreBucketImages(bucketId: Long): Flow<ImageItem>
 
-    fun scanBuckets(): Flow<BucketItem>
+    fun scanMediaStoreBuckets(): Flow<BucketItem>
+
+}
+
+interface SAFMediaScanner {
+    fun scanSAFBucketsImages(uri: Uri): Flow<ImageItem>
+}
+
+interface ShizukuMediaScanner {
+    fun scanShizukuBucketsImages(uri: Uri): Flow<ImageItem>
 }
 
 class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: Context) :
     MediaStoreScanner {
     private val contentResolver: ContentResolver = context.contentResolver
 
-    override fun scanBuckets() = flow<BucketItem> {
+    override fun scanMediaStoreBuckets() = flow<BucketItem> {
         val buckets = mutableSetOf<Long>()
         contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -63,7 +81,14 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
                         buckets.add(bucketId)
                         emit(
                             BucketItem(
-                                bucketId, bucketName, relativePath, coverId, modifiedDate = date
+                                id = bucketId,
+                                name = bucketName,
+                                relativePath = relativePath,
+                                modifiedDate = date,
+                                coverUri = ContentUris.withAppendedId(
+                                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, coverId
+                                ).toString(),
+                                type = BucketType.MediaStore
                             )
                         )
                     }
@@ -75,7 +100,7 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
     }
 
 
-    override fun scanBucketImages(bucketId: Long): Flow<ImageItem> = flow {
+    override fun scanMediaStoreBucketImages(bucketId: Long): Flow<ImageItem> = flow {
         contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             arrayOf(
@@ -89,7 +114,7 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
                 MediaStore.Images.Media.MIME_TYPE
             ),
             "${MediaStore.Images.Media.BUCKET_ID} = ?} and (${MediaStore.Images.Media.MIME_TYPE} = ? or ${MediaStore.Images.Media.MIME_TYPE} = ? or ${MediaStore.Images.Media.MIME_TYPE} = ?)",
-            arrayOf(bucketId.toString(),"image/jpeg", "image/png", "image/gif"),
+            arrayOf(bucketId.toString(), "image/jpeg", "image/png", "image/gif"),
             "${MediaStore.Images.Media.DATE_TAKEN} DESC"
         )?.use {
             val bucketIdIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_ID)
@@ -134,5 +159,12 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
         }
     }
 
+}
 
+class DefaultSAFMediaScanner @Inject constructor() : SAFMediaScanner {
+    override fun scanSAFBucketsImages(uri: Uri) = flow<ImageItem> { }
+}
+
+class DefaultShizukuMediaScanner @Inject constructor() : ShizukuMediaScanner {
+    override fun scanShizukuBucketsImages(uri: Uri) = flow<ImageItem> { }
 }

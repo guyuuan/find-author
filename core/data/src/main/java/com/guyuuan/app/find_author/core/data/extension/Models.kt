@@ -19,6 +19,8 @@ fun ImageItem.toImage() = Image(
     id, name, uri, path, dateAdded, bucketId, bucketName, relativePath, mimeType
 )
 
-fun Bucket.toBucketItem() = BucketItem(id, name, relativePath, coverId, selected, modifiedDate)
+fun Bucket.toBucketItem() =
+    BucketItem(id, name, uri, relativePath, selected, modifiedDate, coverUri, type)
 
-fun BucketItem.toBucket() = Bucket(id, name, relativePath, selected, coverId, modifiedDate)
+fun BucketItem.toBucket() =
+    Bucket(id, name, uri, relativePath, selected, modifiedDate, coverUri, type)

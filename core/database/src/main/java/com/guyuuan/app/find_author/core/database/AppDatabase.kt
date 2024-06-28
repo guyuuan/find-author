@@ -18,12 +18,15 @@ package com.guyuuan.app.find_author.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.guyuuan.app.find_author.core.database.dao.BucketDao
 import com.guyuuan.app.find_author.core.database.dao.ImageDao
 import com.guyuuan.app.find_author.core.database.model.Bucket
+import com.guyuuan.app.find_author.core.database.model.BucketTypeConverter
 import com.guyuuan.app.find_author.core.database.model.Image
 
 @Database(entities = [Image::class, Bucket::class], version = 1)
+@TypeConverters(BucketTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun imageDao(): ImageDao
     abstract fun bucketDao(): BucketDao

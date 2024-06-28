@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7044b3d63f5e2ce1c8e5520887146d52",
+    "identityHash": "c8bb56f4c567be9ea3ce800cb8f88a67",
     "entities": [
       {
         "tableName": "Image",
@@ -74,7 +74,7 @@
       },
       {
         "tableName": "Bucket",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `relativePath` TEXT NOT NULL, `selected` INTEGER NOT NULL, `coverId` INTEGER, `modifiedDate` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `uri` TEXT, `relativePath` TEXT NOT NULL, `selected` INTEGER NOT NULL, `modifiedDate` INTEGER NOT NULL, `coverUri` TEXT, `type` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -89,6 +89,12 @@
             "notNull": true
           },
           {
+            "fieldPath": "uri",
+            "columnName": "uri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "relativePath",
             "columnName": "relativePath",
             "affinity": "TEXT",
@@ -101,14 +107,20 @@
             "notNull": true
           },
           {
-            "fieldPath": "coverId",
-            "columnName": "coverId",
+            "fieldPath": "modifiedDate",
+            "columnName": "modifiedDate",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coverUri",
+            "columnName": "coverUri",
+            "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "modifiedDate",
-            "columnName": "modifiedDate",
+            "fieldPath": "type",
+            "columnName": "type",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -126,7 +138,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7044b3d63f5e2ce1c8e5520887146d52')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c8bb56f4c567be9ea3ce800cb8f88a67')"
     ]
   }
 }

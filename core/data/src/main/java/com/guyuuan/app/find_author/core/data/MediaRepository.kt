@@ -1,6 +1,6 @@
 package com.guyuuan.app.find_author.core.data
 
-import com.guyuuan.app.find_author.core.data.media.MediaStoreScanner
+import com.guyuuan.app.find_author.core.data.media.MediaScanner
 import javax.inject.Inject
 
 /**
@@ -15,10 +15,10 @@ interface MediaRepository : BucketRepository, ImageRepository {
 class DefaultMediaRepository @Inject constructor(
     private val bucketRepository: BucketRepository,
     private val imageRepository: ImageRepository,
-    private val scanner: MediaStoreScanner
+    private val scanner: MediaScanner
 ) : MediaRepository, BucketRepository by bucketRepository, ImageRepository by imageRepository {
     override suspend fun loadSystemBuckets() {
-        scanner.scanBuckets().collect {
+        scanner.scanMediaStoreBuckets().collect {
             val buckets = getBucket(it.id)
             if (buckets == null) {
                 addBucket(it)

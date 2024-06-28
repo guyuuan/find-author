@@ -26,6 +26,8 @@ import com.guyuuan.app.find_author.core.data.FakeAppConfigRepository
 import com.guyuuan.app.find_author.core.data.ImageRepository
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.media.AndroidMediaStoreScanner
+import com.guyuuan.app.find_author.core.data.media.DefaultMediaScanner
+import com.guyuuan.app.find_author.core.data.media.MediaScanner
 import com.guyuuan.app.find_author.core.data.media.MediaStoreScanner
 import dagger.Binds
 import dagger.Module
@@ -46,8 +48,8 @@ interface DataModule {
     @Singleton
     @Binds
     fun bindsMediaScanner(
-        mediaScanner: AndroidMediaStoreScanner
-    ): MediaStoreScanner
+        mediaScanner: DefaultMediaScanner
+    ): MediaScanner
 
     @Singleton
     @Binds
