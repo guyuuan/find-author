@@ -12,7 +12,7 @@ import androidx.room.TypeConverters
  **/
 @Entity
 data class Bucket(
-    @PrimaryKey val id: Long,
+    @PrimaryKey(autoGenerate = true) val id: Long,
     val name: String,
     val uri: String?,
     val relativePath: String,

@@ -22,13 +22,13 @@ import androidx.room.PrimaryKey
 @Entity
 data class Image(
     @PrimaryKey
-    val id: Long,
+    val id: String,
     val name: String,
     val uri: String,
-    val path: String,
+    val path: String? = null,
     val dateAdded: Long,
     val bucketId: Long,
-    val bucketName: String,
-    val relativePath: String,
+    val bucketName: String? = null,
+    val relativePath: String? = null,
     val mimeType: String
 )

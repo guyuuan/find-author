@@ -2,16 +2,16 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c8bb56f4c567be9ea3ce800cb8f88a67",
+    "identityHash": "27b51c97ee025323ce2f5478259e5bc0",
     "entities": [
       {
         "tableName": "Image",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `uri` TEXT NOT NULL, `path` TEXT NOT NULL, `dateAdded` INTEGER NOT NULL, `bucketId` INTEGER NOT NULL, `bucketName` TEXT NOT NULL, `relativePath` TEXT NOT NULL, `mimeType` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `uri` TEXT NOT NULL, `path` TEXT, `dateAdded` INTEGER NOT NULL, `bucketId` INTEGER NOT NULL, `bucketName` TEXT, `relativePath` TEXT, `mimeType` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -30,7 +30,7 @@
             "fieldPath": "path",
             "columnName": "path",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "dateAdded",
@@ -48,13 +48,13 @@
             "fieldPath": "bucketName",
             "columnName": "bucketName",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "relativePath",
             "columnName": "relativePath",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           },
           {
             "fieldPath": "mimeType",
@@ -74,7 +74,7 @@
       },
       {
         "tableName": "Bucket",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `uri` TEXT, `relativePath` TEXT NOT NULL, `selected` INTEGER NOT NULL, `modifiedDate` INTEGER NOT NULL, `coverUri` TEXT, `type` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uri` TEXT, `relativePath` TEXT NOT NULL, `selected` INTEGER NOT NULL, `modifiedDate` INTEGER NOT NULL, `coverUri` TEXT, `type` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -126,7 +126,7 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
             "id"
           ]
@@ -138,7 +138,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c8bb56f4c567be9ea3ce800cb8f88a67')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '27b51c97ee025323ce2f5478259e5bc0')"
     ]
   }
 }

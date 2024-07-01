@@ -27,8 +27,12 @@ import com.guyuuan.app.find_author.core.data.ImageRepository
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.media.AndroidMediaStoreScanner
 import com.guyuuan.app.find_author.core.data.media.DefaultMediaScanner
+import com.guyuuan.app.find_author.core.data.media.DefaultSAFMediaScanner
+import com.guyuuan.app.find_author.core.data.media.DefaultShizukuMediaScanner
 import com.guyuuan.app.find_author.core.data.media.MediaScanner
 import com.guyuuan.app.find_author.core.data.media.MediaStoreScanner
+import com.guyuuan.app.find_author.core.data.media.SAFMediaScanner
+import com.guyuuan.app.find_author.core.data.media.ShizukuMediaScanner
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -59,9 +63,28 @@ interface DataModule {
 
     @Singleton
     @Binds
+    fun bindsMediaStoreScanner(
+        mediaStoreScanner: AndroidMediaStoreScanner
+    ): MediaStoreScanner
+
+    @Singleton
+    @Binds
+    fun bindsSAFScanner(
+        mediaStoreScanner: DefaultSAFMediaScanner
+    ): SAFMediaScanner
+
+    @Singleton
+    @Binds
     fun bindsMediaRepository(
         mediaRepository: DefaultMediaRepository
     ): MediaRepository
+
+    @Singleton
+    @Binds
+    fun  bindsRootMediaScanner(
+        mediaScanner: DefaultShizukuMediaScanner
+    ): ShizukuMediaScanner
+
 
     @Singleton
     @Binds

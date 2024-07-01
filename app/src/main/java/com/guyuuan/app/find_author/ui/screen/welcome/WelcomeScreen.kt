@@ -7,6 +7,8 @@
 package com.guyuuan.app.find_author.ui.screen.welcome
 
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -15,7 +17,9 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -42,14 +46,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.guyuuan.app.find_author.ui.screen.bucket.SAFPreviewArgs
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ChooseBucketsScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.SAFPreviewScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.WelcomeScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.popUpTo
@@ -237,13 +244,35 @@ private abstract class WelcomeStep {
         context(WelcomeScreenScope)
         @Composable
         override fun Content(modifier: Modifier) {
-            TextButton(modifier = modifier, onClick = {
-                navigator.navigate(ChooseBucketsScreenDestination)
-            }) {
-                Text(
-                    "Let's get started choose your buckets",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+            val getSAF =
+                rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
+                    it?.let { uri ->
+
+                        navigator.navigate(SAFPreviewScreenDestination(SAFPreviewArgs(uri = uri.toString())))
+                    }
+
+                }
+            Column(
+                modifier = modifier,
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TextButton(modifier = modifier, onClick = {
+                    navigator.navigate(ChooseBucketsScreenDestination)
+                }) {
+                    Text(
+                        "Let's get started choose your buckets",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                TextButton(modifier = modifier, onClick = {
+                    getSAF.launch(null)
+//                    navigator.navigate(ChooseBucketsScreenDestination)
+                }) {
+                    Text(
+                        "SAF", style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }
