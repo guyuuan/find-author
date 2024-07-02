@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
  * @description:
  **/
 abstract class BaseViewModel<State : UiState, Event : UiEvent> : ViewModel() {
-    abstract val uiStat: StateFlow<State>
+    abstract val uiState: StateFlow<State>
 
     protected abstract suspend fun onEvent(event: Event)
     private val eventChannel = Channel<Unit>(1)
@@ -24,9 +24,9 @@ abstract class BaseViewModel<State : UiState, Event : UiEvent> : ViewModel() {
         eventChannel.runBlock {
             try {
                 onEvent(event)
-                withContext(Dispatchers.Main) { event.onSuccess() }
+                withContext(Dispatchers.Main) { event.onSuccess?.invoke() }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) { event.onFailed(e) }
+                withContext(Dispatchers.Main) { event.onFailed?.invoke(e) }
             }
         }
     }
@@ -46,13 +46,17 @@ fun Channel<Unit>.runBlock(block: suspend () -> Unit) {
     }
 }
 
+typealias UiEventOnSuccess = () -> Unit
+typealias UiEventOnFailed = (Throwable) -> Unit
 
 interface UiEvent {
     val dispatcher: CoroutineDispatcher
         get() = Dispatchers.IO
 
-    fun onSuccess() {}
-    fun onFailed(throwable: Throwable) {}
+    val onSuccess: UiEventOnSuccess?
+        get() = null
+    val onFailed: UiEventOnFailed?
+        get() = null
 }
 
 interface UiState

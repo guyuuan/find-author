@@ -3,9 +3,6 @@ package com.guyuuan.app.find_author.core.data.media
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import android.provider.DocumentsContract
 import android.provider.MediaStore
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
@@ -19,17 +16,9 @@ import javax.inject.Inject
 
 /**
  * @author: Chen
- * @createTime: 6/6/24 17:50
+ * @createTime: 7/2/24 16:36
  * @description:
  **/
-interface MediaScanner : MediaStoreScanner, SAFMediaScanner, ShizukuMediaScanner
-
-class DefaultMediaScanner @Inject constructor(
-    mediaStore: MediaStoreScanner, saf: SAFMediaScanner, shizuku: ShizukuMediaScanner
-) : MediaScanner, MediaStoreScanner by mediaStore, SAFMediaScanner by saf,
-    ShizukuMediaScanner by shizuku
-
-
 interface MediaStoreScanner {
 
 
@@ -37,14 +26,6 @@ interface MediaStoreScanner {
 
     fun scanMediaStoreBuckets(): Flow<BucketItem>
 
-}
-
-interface SAFMediaScanner {
-    fun scanSAFBucketsImages(uri: Uri): Flow<ImageItem>
-}
-
-interface ShizukuMediaScanner {
-    fun scanShizukuBucketsImages(uri: Uri): Flow<ImageItem>
 }
 
 class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: Context) :
@@ -128,7 +109,7 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
             val pathIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             val relativePathIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
             val mimeTypeIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
-            while (it.moveToNext()) {
+            while (it.moveToNext() && currentCoroutineContext().isActive) {
                 try {
                     val bucketID = it.getLong(bucketIdIndex)
                     val bucketName = it.getString(bucketNameIndex)
@@ -161,62 +142,4 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
         }
     }
 
-}
-
-class DefaultSAFMediaScanner @Inject constructor(@ApplicationContext context: Context) :
-    SAFMediaScanner {
-    private val contentResolver: ContentResolver = context.contentResolver
-    override fun scanSAFBucketsImages(uri: Uri) = flow<ImageItem> {
-        val bucketName = uri.path
-        val bucketUri = DocumentsContract.buildChildDocumentsUriUsingTree(
-            uri, DocumentsContract.getTreeDocumentId(uri)
-        )
-        contentResolver.query(
-            bucketUri,
-            arrayOf(
-                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-                DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                DocumentsContract.Document.COLUMN_LAST_MODIFIED,
-                DocumentsContract.Document.COLUMN_MIME_TYPE,
-            ),
-            null,null,
-            "${DocumentsContract.Document.COLUMN_LAST_MODIFIED} DESC"
-        )?.use {
-            val displayNameIndex = it.getColumnIndexOrThrow(                DocumentsContract.Document.COLUMN_DISPLAY_NAME)
-            val dateAddedIndex = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
-            val idIndex = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
-            val mimeTypeIndex = it.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
-            while (it.moveToNext()) {
-                try {
-                    val displayName = it.getString(displayNameIndex)
-                    val dateAdded = it.getLong(dateAddedIndex)
-                    val id = it.getString(idIndex)
-                    val mimeType = it.getString(mimeTypeIndex)
-                    if(!mimeType.startsWith("image")) continue
-                    val imageUri = DocumentsContract.buildDocumentUriUsingTree(
-                        bucketUri, id
-                    )
-                    emit(
-                        ImageItem(
-                            id = id,
-                            name = displayName,
-                            uri = imageUri.toString(),
-                            mimeType = mimeType,
-                            dateAdded = dateAdded,
-                            bucketId = 0L,
-                            bucketName = bucketName,
-                        )
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-
-
-    }
-}
-
-class DefaultShizukuMediaScanner @Inject constructor() : ShizukuMediaScanner {
-    override fun scanShizukuBucketsImages(uri: Uri) = flow<ImageItem> { }
 }

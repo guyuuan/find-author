@@ -22,7 +22,6 @@ import com.guyuuan.app.find_author.core.data.DefaultAppConfigRepository
 import com.guyuuan.app.find_author.core.data.DefaultBucketRepository
 import com.guyuuan.app.find_author.core.data.DefaultImageRepository
 import com.guyuuan.app.find_author.core.data.DefaultMediaRepository
-import com.guyuuan.app.find_author.core.data.FakeAppConfigRepository
 import com.guyuuan.app.find_author.core.data.ImageRepository
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.media.AndroidMediaStoreScanner
@@ -81,7 +80,7 @@ interface DataModule {
 
     @Singleton
     @Binds
-    fun  bindsRootMediaScanner(
+    fun bindsRootMediaScanner(
         mediaScanner: DefaultShizukuMediaScanner
     ): ShizukuMediaScanner
 

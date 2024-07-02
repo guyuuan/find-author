@@ -25,8 +25,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:database"))
-    implementation(project(":core:datastore"))
+    api(project(":core:database"))
+    api(project(":core:datastore"))
 
     // Arch Components
     implementation(libs.hilt.android)
@@ -38,5 +38,5 @@ dependencies {
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.androidx.paging3.runtime)
-//    implementation(libs.androidx.dataStore.proto)
+    api(libs.androidx.documentFile)
 }

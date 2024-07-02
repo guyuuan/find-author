@@ -43,7 +43,7 @@ fun ChooseBucketsScreen(
     viewModel: ChooseBucketsViewModel = hiltViewModel(),
     navigator: DestinationsNavigator
 ) {
-    val uiState by viewModel.uiStat.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     AnimatedContent(targetState = uiState, label = "chooseBuckets") { state ->
 
         when (state) {
@@ -86,7 +86,7 @@ private fun SuccessScreen(modifier: Modifier = Modifier, uiState: ChooseBucketsU
         items(uiState.buckets) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 SubcomposeAsyncImage(
-                    model = it.coverUri?.toString(),
+                    model = it.coverUri,
                     contentDescription = null,
                     modifier = Modifier
                         .aspectRatio(1f)

@@ -25,7 +25,7 @@ import javax.inject.Inject
 class ChooseBucketsViewModel @Inject constructor(
     private val mediaRepository: MediaRepository
 ) : BaseViewModel<ChooseBucketsUiState, SelectBucketsEvent>() {
-    override val uiStat: StateFlow<ChooseBucketsUiState> = mediaRepository.getAllBuckets()
+    override val uiState: StateFlow<ChooseBucketsUiState> = mediaRepository.getAllBuckets()
         .map<List<BucketItem>, ChooseBucketsUiState> { ChooseBucketsUiState.Success(it) }
         .catch { emit(ChooseBucketsUiState.Error(it)) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ChooseBucketsUiState.Loading)

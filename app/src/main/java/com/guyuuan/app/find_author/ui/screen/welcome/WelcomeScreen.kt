@@ -1,7 +1,7 @@
 @file:OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
-    ExperimentalPermissionsApi::class
+    ExperimentalPermissionsApi::class, ExperimentalLayoutApi::class
 )
 
 package com.guyuuan.app.find_author.ui.screen.welcome
@@ -20,7 +20,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -46,8 +50,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -78,7 +86,7 @@ private val pageList =
 )
 @Composable
 fun WelcomeScreen(viewModel: WelcomeViewModel = hiltViewModel(), navigator: DestinationsNavigator) {
-    val uiState by viewModel.uiStat.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val pagerState = rememberPagerState { pageList.size }
     val coroutineScope = rememberCoroutineScope()
     Scaffold(topBar = {
@@ -86,7 +94,7 @@ fun WelcomeScreen(viewModel: WelcomeViewModel = hiltViewModel(), navigator: Dest
     }, floatingActionButton = {
         FloatActionButton(pagerState, coroutineScope, viewModel, navigator)
     }) {
-        with(remember { WelcomeScreenScopeImpl(coroutineScope, navigator) }) {
+        with(remember { WelcomeScreenScopeImpl(coroutineScope, navigator, viewModel) }) {
             HorizontalPager(
                 modifier = Modifier.padding(it), state = pagerState, userScrollEnabled = false
             ) { index ->
@@ -124,7 +132,7 @@ fun FloatActionButton(
                 if (pagerState.canScrollForward) {
                     pagerState.animateScrollToPage(pagerState.settledPage + 1)
                 } else {
-                    viewModel.dispatch(WelcomeEvent.Confirm(success = {
+                    viewModel.dispatch(WelcomeEvent.Confirm(onSuccess = {
                         navigator.navigate(HomeScreenDestination) {
                             popUpTo(WelcomeScreenDestination.route) {
                                 inclusive = true
@@ -163,10 +171,13 @@ fun FloatActionButton(
 private interface WelcomeScreenScope {
     val coroutineScope: CoroutineScope
     val navigator: DestinationsNavigator
+    val viewModel: WelcomeViewModel
 }
 
 private class WelcomeScreenScopeImpl(
-    override val coroutineScope: CoroutineScope, override val navigator: DestinationsNavigator
+    override val coroutineScope: CoroutineScope,
+    override val navigator: DestinationsNavigator,
+    override val viewModel: WelcomeViewModel
 ) : WelcomeScreenScope {}
 
 private abstract class WelcomeStep {
@@ -252,11 +263,42 @@ private abstract class WelcomeStep {
                     }
 
                 }
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val selectedBuckets = remember(uiState) {
+                when (val state = uiState) {
+                    is WelcomeUiState.Success -> state.buckets
+                    else -> emptyList()
+                }
+            }
             Column(
                 modifier = modifier,
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    for (bucket in selectedBuckets) {
+                        SubcomposeAsyncImage(
+                            model = bucket.coverUri,
+                            contentDescription = bucket.name,
+                            contentScale = ContentScale.Crop,
+                            error = { e ->
+                                Timber.e(e.result.throwable)
+                                Text(
+                                    bucket.name + "\n" + e.result.throwable.toString(),
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth(0.16f)
+                                .aspectRatio(1f, true)
+                                .clip(MaterialTheme.shapes.small)
+                        )
+                    }
+                }
                 TextButton(modifier = modifier, onClick = {
                     navigator.navigate(ChooseBucketsScreenDestination)
                 }) {

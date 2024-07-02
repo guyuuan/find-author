@@ -6,6 +6,8 @@ import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.ui.BaseViewModel
 import com.guyuuan.app.find_author.core.ui.UiEvent
+import com.guyuuan.app.find_author.core.ui.UiEventOnFailed
+import com.guyuuan.app.find_author.core.ui.UiEventOnSuccess
 import com.guyuuan.app.find_author.core.ui.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +27,7 @@ class WelcomeViewModel @Inject constructor(
     private val appConfigRepository: AppConfigRepository,
     private val mediaRepository: MediaRepository
 ) : BaseViewModel<WelcomeUiState, WelcomeEvent>() {
-    override val uiStat: StateFlow<WelcomeUiState> =
+    override val uiState: StateFlow<WelcomeUiState> =
         combine<Boolean, List<BucketItem>, WelcomeUiState>(
             appConfigRepository.getInitializedFlow(), mediaRepository.getSelectedBuckets()
         ) { initialized, buckets ->
@@ -52,10 +54,7 @@ sealed interface WelcomeUiState : UiState {
 }
 
 interface WelcomeEvent : UiEvent {
-    data class Confirm(val success: () -> Unit = {}, val failed: (Throwable) -> Unit = {}) :
-        WelcomeEvent {
-        override fun onSuccess() = success()
-
-        override fun onFailed(throwable: Throwable) = failed(throwable)
-    }
+    data class Confirm(
+        override val onSuccess: UiEventOnSuccess, override val onFailed: UiEventOnFailed? = null
+    ) : WelcomeEvent
 }

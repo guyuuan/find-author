@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.targets.js.binaryen.BinaryenRootPlugin.Companion.kotlinBinaryenExtension
-
 /*
  * Copyright (C) 2022 The Android Open Source Project
  *
@@ -104,4 +102,5 @@ dependencies {
     implementation(libs.accompanist.permissions)
     ksp(libs.compose.destinations.ksp)
     implementation(libs.chitanda.dynamicstatusbar)
+    implementation(libs.kotlinx.datetime)
 }
