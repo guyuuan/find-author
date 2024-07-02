@@ -1,9 +1,11 @@
 package com.guyuuan.app.find_author.core.data
 
+import androidx.paging.PagingSource
 import com.guyuuan.app.find_author.core.data.extension.toBucket
 import com.guyuuan.app.find_author.core.data.extension.toBucketItem
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.database.dao.BucketDao
+import com.guyuuan.app.find_author.core.database.model.Bucket
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -18,6 +20,7 @@ interface BucketRepository {
     suspend fun deleteBucket(vararg bucket: BucketItem)
     suspend fun updateBucket(vararg bucket: BucketItem)
     fun getAllBuckets(): Flow<List<BucketItem>>
+    fun getPagingBuckets(): PagingSource<Int, Bucket>
     suspend fun getBucket(bucketId: Long): BucketItem?
     fun getSelectedBuckets(): Flow<List<BucketItem>>
 }
@@ -54,5 +57,7 @@ class DefaultBucketRepository @Inject constructor(
             it.toBucketItem()
         }
     }
+
+    override fun getPagingBuckets() = bucketDao.getPagingBuckets()
 }
 

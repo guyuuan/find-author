@@ -103,4 +103,5 @@ dependencies {
     ksp(libs.compose.destinations.ksp)
     implementation(libs.chitanda.dynamicstatusbar)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.androidx.paging3.compose)
 }

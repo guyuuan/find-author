@@ -1,5 +1,6 @@
 package com.guyuuan.app.find_author.core.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -21,6 +22,9 @@ interface BucketDao {
 
     @Query("SELECT * FROM bucket ORDER BY modifiedDate DESC")
     fun getBuckets(): Flow<List<Bucket>>
+
+    @Query("SELECT * FROM bucket ORDER BY modifiedDate DESC")
+    fun getPagingBuckets(): PagingSource<Int, Bucket>
 
     @Query("SELECT * FROM bucket WHERE id = :bucketId")
     suspend fun getBucket(bucketId: Long): Bucket?

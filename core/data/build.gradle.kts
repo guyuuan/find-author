@@ -37,6 +37,6 @@ dependencies {
     // Local tests: jUnit, coroutines, Android runner
     testImplementation(libs.junit4)
     testImplementation(libs.kotlinx.coroutines.test)
-    implementation(libs.androidx.paging3.runtime)
+    api(libs.androidx.paging3.runtime)
     api(libs.androidx.documentFile)
 }
