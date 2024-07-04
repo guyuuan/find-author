@@ -1,7 +1,8 @@
 @file:OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
-    ExperimentalPermissionsApi::class, ExperimentalLayoutApi::class
+    ExperimentalPermissionsApi::class,
+    ExperimentalLayoutApi::class
 )
 
 package com.guyuuan.app.find_author.ui.screen.welcome
@@ -10,6 +11,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,22 +23,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -59,6 +65,9 @@ import coil.compose.SubcomposeAsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.guyuuan.app.find_author.core.data.model.BucketItem
+import com.guyuuan.app.find_author.core.ui.compoments.SwipeToHoldBox
+import com.guyuuan.app.find_author.core.ui.compoments.rememberSwipeToHoldBoxState
 import com.guyuuan.app.find_author.ui.screen.bucket.SAFPreviewArgs
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -178,7 +187,7 @@ private class WelcomeScreenScopeImpl(
     override val coroutineScope: CoroutineScope,
     override val navigator: DestinationsNavigator,
     override val viewModel: WelcomeViewModel
-) : WelcomeScreenScope {}
+) : WelcomeScreenScope
 
 private abstract class WelcomeStep {
 
@@ -275,27 +284,26 @@ private abstract class WelcomeStep {
                 verticalArrangement = Arrangement.spacedBy(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FlowRow(
-                    modifier = Modifier.padding(horizontal = 24.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                this.AnimatedVisibility(uiState is WelcomeUiState.Error) {
+                    Text(
+                        (uiState as WelcomeUiState.Error).error.toString(),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                LazyRow(
+                    modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally),
+                    contentPadding = PaddingValues(24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    for (bucket in selectedBuckets) {
-                        SubcomposeAsyncImage(
-                            model = bucket.coverUri,
-                            contentDescription = bucket.name,
-                            contentScale = ContentScale.Crop,
-                            error = { e ->
-                                Timber.e(e.result.throwable)
-                                Text(
-                                    bucket.name + "\n" + e.result.throwable.toString(),
-                                    color = MaterialTheme.colorScheme.error
-                                )
-                            },
+                    items(items = selectedBuckets, key = { it.id }) { bucket ->
+                        BucketPreview(
                             modifier = Modifier
-                                .fillMaxWidth(0.16f)
-                                .aspectRatio(1f, true)
-                                .clip(MaterialTheme.shapes.small)
+                                .size(128.dp)
+                                .clip(MaterialTheme.shapes.small),
+                            bucket = bucket,
+                            onDelete = {
+                                viewModel.dispatch(WelcomeEvent.RemoveBucket(bucket))
+                            },
                         )
                     }
                 }
@@ -317,5 +325,55 @@ private abstract class WelcomeStep {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BucketPreview(
+    modifier: Modifier = Modifier, bucket: BucketItem, onDelete: (BucketItem) -> Unit
+) {
+    val state = rememberSwipeToHoldBoxState(key = bucket.id.toString())
+    SwipeToHoldBox(modifier = modifier,
+        state = state,
+        endAnchor = 0.38f,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            AnimatedVisibility(
+                visible = state.progress > 0.75f,
+                modifier = Modifier.align(Alignment.BottomCenter),
+                enter = scaleIn(
+                    animationSpec = tween(
+                        durationMillis = 400, delayMillis = 200
+                    )
+                ) + fadeIn(animationSpec = tween(durationMillis = 400, delayMillis = 200)),
+                exit = scaleOut() + fadeOut()
+            ) {
+                IconButton(onClick = {
+                    onDelete(bucket)
+                }) {
+                    Icon(
+                        Icons.Default.Delete,
+                        null,
+                        tint = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+
+        }) {
+        SubcomposeAsyncImage(
+            model = bucket.coverUri,
+            contentDescription = bucket.name,
+            contentScale = ContentScale.Crop,
+            error = { e ->
+                Timber.e(e.result.throwable)
+                Text(
+                    bucket.name + "\n" + e.result.throwable.toString(),
+                    color = MaterialTheme.colorScheme.error
+                )
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(MaterialTheme.shapes.small)
+        )
     }
 }

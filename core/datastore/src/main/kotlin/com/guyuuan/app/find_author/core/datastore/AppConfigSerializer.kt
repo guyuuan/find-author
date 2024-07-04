@@ -1,6 +1,7 @@
 package com.guyuuan.app.find_author.core.datastore
 
 import androidx.datastore.core.Serializer
+import com.guyuuan.app.find_author.core.datastore.proto.AppConfig
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject

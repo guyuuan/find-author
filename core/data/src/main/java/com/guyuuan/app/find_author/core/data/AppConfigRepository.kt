@@ -1,7 +1,7 @@
 package com.guyuuan.app.find_author.core.data
 
 import androidx.datastore.core.DataStore
-import com.guyuuan.app.find_author.core.datastore.AppConfig
+import com.guyuuan.app.find_author.core.datastore.proto.AppConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -32,7 +32,7 @@ class DefaultAppConfigRepository @Inject constructor(
 }
 
 class FakeAppConfigRepository @Inject constructor() : AppConfigRepository {
-    override fun getInitializedFlow(): Flow<Boolean> = flow{
+    override fun getInitializedFlow(): Flow<Boolean> = flow {
         emit(false)
     }
 

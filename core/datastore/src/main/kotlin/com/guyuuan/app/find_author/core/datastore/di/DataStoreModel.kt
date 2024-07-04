@@ -3,7 +3,7 @@ package com.guyuuan.app.find_author.core.datastore.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
-import com.guyuuan.app.find_author.core.datastore.AppConfig
+import com.guyuuan.app.find_author.core.datastore.proto.AppConfig
 import com.guyuuan.app.find_author.core.datastore.AppConfigSerializer
 import dagger.Module
 import dagger.Provides

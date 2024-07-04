@@ -41,6 +41,9 @@ class WelcomeViewModel @Inject constructor(
             is WelcomeEvent.Confirm -> {
                 appConfigRepository.setInitialized()
             }
+            is WelcomeEvent.RemoveBucket -> {
+                mediaRepository.updateBucket(event.bucket.copy(selected = false))
+            }
         }
     }
 }
@@ -57,4 +60,6 @@ interface WelcomeEvent : UiEvent {
     data class Confirm(
         override val onSuccess: UiEventOnSuccess, override val onFailed: UiEventOnFailed? = null
     ) : WelcomeEvent
+
+    data class RemoveBucket(val bucket: BucketItem) : WelcomeEvent
 }

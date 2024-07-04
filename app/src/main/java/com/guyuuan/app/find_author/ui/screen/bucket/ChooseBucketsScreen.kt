@@ -2,7 +2,11 @@
 
 package com.guyuuan.app.find_author.ui.screen.bucket
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -36,8 +40,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.guyuuan.app.find_author.core.data.model.BucketItem
+import com.guyuuan.app.find_author.core.ui.compoments.Transform
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -86,7 +95,8 @@ fun ChooseBucketsScreen(
                 }
 
                 is ChooseBucketsUiState.Success -> {
-                    SuccessScreen(uiState = state) { bucket ->
+                    val buckets = state.buckets.collectAsLazyPagingItems()
+                    SuccessScreen(buckets = buckets) { bucket ->
                         viewModel.dispatch(ChooseBucketsEvent.SelectBucket(bucket.copy(selected = !bucket.selected)))
                     }
                 }
@@ -99,54 +109,73 @@ fun ChooseBucketsScreen(
 @Composable
 private fun SuccessScreen(
     modifier: Modifier = Modifier,
-    uiState: ChooseBucketsUiState.Success,
+    buckets: LazyPagingItems<BucketItem>,
     onItemClick: (BucketItem) -> Unit
 ) {
-    if (uiState.buckets.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Text(text = "No buckets found", modifier = Modifier.align(Alignment.Center))
-        }
-        return
-    }
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         modifier = modifier,
         contentPadding = PaddingValues(vertical = 24.dp, horizontal = 8.dp)
     ) {
-        items(uiState.buckets) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .clickable { onItemClick(it) },
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box {
-                    SubcomposeAsyncImage(model = it.coverUri,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .clip(MaterialTheme.shapes.medium),
-                        contentScale = ContentScale.Crop,
-                        loading = {
-                            CircularProgressIndicator()
-                        },
-                        onError = {
-                            Timber.tag("Coil").e(it.result.throwable, "Failed to load image: ")
-                        })
-                    if (it.selected) {
-                        Icon(
-                            Icons.Default.CheckCircle,
-                            contentDescription = "Selected",
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(8.dp, (-8).dp),
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                    }
+        if (buckets.loadState.refresh is LoadState.Loading) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                Text(text = it.relativePath, modifier = Modifier.padding(top = 8.dp))
             }
         }
+
+        items(key = buckets.itemKey { it.id }, count = buckets.itemCount) {
+            val item = buckets[it] ?: return@items
+            Transform(
+                modifier = Modifier.fillMaxSize(),
+                key = item.id,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut(),
+            ) {
+                BucketListItem(modifier = Modifier
+                    .fillMaxSize()
+                    .clip(MaterialTheme.shapes.medium)
+                    .clickable { onItemClick(item) }
+                    .padding(8.dp), item = item)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BucketListItem(modifier: Modifier = Modifier, item: BucketItem) {
+    Column(
+        modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box {
+            SubcomposeAsyncImage(model = item.coverUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .clip(MaterialTheme.shapes.medium),
+                contentScale = ContentScale.Crop,
+                loading = {
+                    CircularProgressIndicator()
+                },
+                onError = { e ->
+                    Timber.tag("Coil").e(e.result.throwable, "Failed to load image: ")
+                })
+            this@Column.AnimatedVisibility(
+                item.selected,
+                enter = scaleIn(),
+                exit = scaleOut(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(8.dp, (-8).dp),
+            ) {
+                Icon(
+                    Icons.Default.CheckCircle, contentDescription = "Selected",
+
+                    tint = MaterialTheme.colorScheme.secondary
+                )
+            }
+        }
+        Text(text = item.relativePath, modifier = Modifier.padding(top = 8.dp))
     }
 }
