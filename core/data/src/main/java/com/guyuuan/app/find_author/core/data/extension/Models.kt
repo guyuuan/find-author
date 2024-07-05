@@ -20,7 +20,7 @@ fun ImageItem.toImage() = Image(
 )
 
 fun Bucket.toBucketItem() =
-    BucketItem(id, name, uri, relativePath, selected, modifiedDate, coverUri, type)
+    BucketItem(id, name, uri, relativePath, selected, modifiedDate, coverUri, type, hide)
 
 fun BucketItem.toBucket() =
-    Bucket(id, name, uri, relativePath, selected, modifiedDate, coverUri, type)
+    Bucket(id, name, uri, relativePath, selected, modifiedDate, coverUri, type, hide)

@@ -7,6 +7,8 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,6 +16,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 /**
  * @author: Chen
@@ -24,8 +29,9 @@ import androidx.compose.ui.Modifier
 fun <T> T.Transform(
     modifier: Modifier = Modifier,
     key: Any? = null,
-    enter: EnterTransition = fadeIn() + expandIn(),
-    exit: ExitTransition = fadeOut() + shrinkOut(),
+    delay:Long = 200L,
+    enter: EnterTransition = fadeIn() + scaleIn(),
+    exit: ExitTransition = fadeOut() + scaleOut(),
     content: @Composable T.() -> Unit
 ) {
     val state = rememberSaveable(key, saver = TransitionSaver) {
@@ -35,7 +41,10 @@ fun <T> T.Transform(
         content()
     }
     LaunchedEffect(key) {
-        state.targetState = true
+        withContext(Dispatchers.Default){
+            delay(delay)
+            state.targetState = true
+        }
     }
 }
 

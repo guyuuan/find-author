@@ -32,7 +32,17 @@ interface ImageRepository {
 
     fun getAllImages(): Flow<List<ImageItem>>
 
-    fun getImagesByBucket(bucketId: Long): Flow<PagingData<ImageItem>>
+    suspend fun checkImageShouldUpdate(image: ImageItem)
+    suspend fun updateImage(vararg image: ImageItem)
+    fun getImagesByBucket(
+        bucketId: Long,
+        config: PagingConfig = PagingConfig(pageSize = 30)
+    ): Flow<PagingData<ImageItem>>
+
+    fun getHomeImages(
+        showHide: Boolean = false,
+        config: PagingConfig = PagingConfig(pageSize = 30)
+    ): Flow<PagingData<ImageItem>>
 
     fun getBucketCover(bucketId: Long): ImageItem?
 
@@ -52,12 +62,21 @@ class DefaultImageRepository @Inject constructor(
         }
     }
 
-    override fun getImagesByBucket(bucketId: Long) =
-        Pager(config = PagingConfig(pageSize = 20)) {
+    override fun getImagesByBucket(bucketId: Long, config: PagingConfig) =
+        Pager(config = config) {
             imageDao.getBuketImages(bucketId)
         }.flow.map { pagingData ->
             pagingData.map { it.toImageItem() }
         }
+
+    override fun getHomeImages(
+        showHide: Boolean,
+        config: PagingConfig
+    ) = Pager(config) {
+        imageDao.getHomeImages(showHide)
+    }.flow.map { pagingData ->
+        pagingData.map { it.toImageItem() }
+    }
 
 
     override fun getBucketCover(bucketId: Long) = imageDao.getBuketCover(bucketId)?.toImageItem()
@@ -68,5 +87,21 @@ class DefaultImageRepository @Inject constructor(
 
     override suspend fun deleteImageByBucket(bucketId: Long) = imageDao.deleteBucketImage(bucketId)
 
+    override suspend fun checkImageShouldUpdate(image: ImageItem) {
+       val img = imageDao.getImageById(image.id)
+        if(img==null) {
+            addImage(image)
+            return
+        }
+        if(img != image.toImage() ){
+            updateImage(image)
+        }
+    }
 
+
+    override suspend fun updateImage(vararg image: ImageItem) {
+        imageDao.updateImage(*image.map {
+            it.toImage()
+        }.toTypedArray())
+    }
 }

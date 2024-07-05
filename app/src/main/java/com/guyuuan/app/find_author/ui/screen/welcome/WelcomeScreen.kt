@@ -267,7 +267,6 @@ private abstract class WelcomeStep {
             val getSAF =
                 rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
                     it?.let { uri ->
-
                         navigator.navigate(SAFPreviewScreenDestination(SAFPreviewArgs(uri = uri.toString())))
                     }
 

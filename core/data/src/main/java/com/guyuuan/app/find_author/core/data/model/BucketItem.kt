@@ -17,5 +17,6 @@ data class BucketItem(
     val selected: Boolean = false,
     val modifiedDate:Long,
     val coverUri:String?,
-    val type:BucketType
+    val type:BucketType,
+    val hide:Boolean=false
 )

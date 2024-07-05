@@ -1,11 +1,13 @@
 package com.guyuuan.app.find_author.core.data
 
-import androidx.paging.PagingSource
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.guyuuan.app.find_author.core.data.extension.toBucket
 import com.guyuuan.app.find_author.core.data.extension.toBucketItem
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.database.dao.BucketDao
-import com.guyuuan.app.find_author.core.database.model.Bucket
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,7 +22,7 @@ interface BucketRepository {
     suspend fun deleteBucket(vararg bucket: BucketItem)
     suspend fun updateBucket(vararg bucket: BucketItem)
     fun getAllBuckets(): Flow<List<BucketItem>>
-    fun getPagingBuckets(): PagingSource<Int, Bucket>
+    fun getPagingBuckets(config: PagingConfig = PagingConfig(pageSize = 10)): Flow<PagingData<BucketItem>>
     suspend fun getBucket(bucketId: Long): BucketItem?
     fun getSelectedBuckets(): Flow<List<BucketItem>>
 }
@@ -49,8 +51,7 @@ class DefaultBucketRepository @Inject constructor(
         }
     }
 
-    override suspend fun getBucket(bucketId: Long) =
-        bucketDao.getBucket(bucketId)?.toBucketItem()
+    override suspend fun getBucket(bucketId: Long) = bucketDao.getBucket(bucketId)?.toBucketItem()
 
     override fun getSelectedBuckets() = bucketDao.getSelectedBuckets().map { buckets ->
         buckets.map {
@@ -58,6 +59,11 @@ class DefaultBucketRepository @Inject constructor(
         }
     }
 
-    override fun getPagingBuckets() = bucketDao.getPagingBuckets()
+    override fun getPagingBuckets(config: PagingConfig) =
+        Pager(config = config) {
+            bucketDao.getPagingBuckets()
+        }.flow.map {
+            it.map { b -> b.toBucketItem() }
+        }
 }
 

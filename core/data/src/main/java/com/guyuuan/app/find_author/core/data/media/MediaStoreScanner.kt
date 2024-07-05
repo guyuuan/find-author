@@ -8,9 +8,11 @@ import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.database.model.BucketType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import javax.inject.Inject
 
@@ -22,7 +24,7 @@ import javax.inject.Inject
 interface MediaStoreScanner {
 
 
-    fun scanMediaStoreBucketImages(bucketId: Long): Flow<ImageItem>
+    fun scanMediaStoreBucketImages(bucketId: Long): Flow<ScanStatus<ImageItem>>
 
     fun scanMediaStoreBuckets(): Flow<BucketItem>
 
@@ -32,7 +34,7 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
     MediaStoreScanner {
     private val contentResolver: ContentResolver = context.contentResolver
 
-    override fun scanMediaStoreBuckets() = flow<BucketItem> {
+    override fun scanMediaStoreBuckets() = flow {
         val buckets = mutableSetOf<Long>()
         contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
@@ -80,10 +82,10 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
                 }
             }
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
 
-    override fun scanMediaStoreBucketImages(bucketId: Long): Flow<ImageItem> = flow {
+    override fun scanMediaStoreBucketImages(bucketId: Long): Flow<ScanStatus<ImageItem>> = flow {
         contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             arrayOf(
@@ -123,23 +125,26 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                     )
                     emit(
-                        ImageItem(
-                            id = id.toString(),
-                            name = displayName,
-                            uri = uri.toString(),
-                            path = path,
-                            mimeType = mimeType,
-                            dateAdded = dateAdded,
-                            bucketId = bucketID,
-                            bucketName = bucketName,
-                            relativePath = relativePath,
+                        ScanStatus.Running(
+                            ImageItem(
+                                id = id.toString(),
+                                name = displayName,
+                                uri = uri.toString(),
+                                path = path,
+                                mimeType = mimeType,
+                                dateAdded = dateAdded,
+                                bucketId = bucketID,
+                                bucketName = bucketName,
+                                relativePath = relativePath,
+                            )
                         )
                     )
                 } catch (e: Exception) {
+                    emit(ScanStatus.Error(e))
                     e.printStackTrace()
                 }
             }
         }
-    }
-
+        emit(ScanStatus.Done())
+    }.flowOn(Dispatchers.IO)
 }

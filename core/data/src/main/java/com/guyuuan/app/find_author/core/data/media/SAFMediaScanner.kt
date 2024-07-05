@@ -88,12 +88,11 @@ class DefaultSAFMediaScanner @Inject constructor(@ApplicationContext private val
         val file =
             DocumentFile.fromTreeUri(context, uri) ?: throw Error("Uri[$uri] isn't a tree uri")
 //        file
-
         return BucketItem(
             id = uri.hashCode().toLong(),
             name = file.name ?: "unknown",
             uri = uri.toString(),
-            relativePath = file.parentFile?.name ?: "unknown",
+            relativePath = file.name ?: "unknown",
             coverUri = null,
             modifiedDate = file.lastModified(),
             type = BucketType.SAF

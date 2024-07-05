@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "27b51c97ee025323ce2f5478259e5bc0",
+    "identityHash": "50b85f75d1e9478c69ae2ec97cf61bd3",
     "entities": [
       {
         "tableName": "Image",
@@ -74,7 +74,7 @@
       },
       {
         "tableName": "Bucket",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uri` TEXT, `relativePath` TEXT NOT NULL, `selected` INTEGER NOT NULL, `modifiedDate` INTEGER NOT NULL, `coverUri` TEXT, `type` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `uri` TEXT, `relativePath` TEXT NOT NULL, `selected` INTEGER NOT NULL, `modifiedDate` INTEGER NOT NULL, `coverUri` TEXT, `type` INTEGER NOT NULL, `hide` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -123,6 +123,12 @@
             "columnName": "type",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "hide",
+            "columnName": "hide",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -138,7 +144,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '27b51c97ee025323ce2f5478259e5bc0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '50b85f75d1e9478c69ae2ec97cf61bd3')"
     ]
   }
 }

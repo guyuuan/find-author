@@ -1,6 +1,11 @@
 package com.guyuuan.app.find_author.core.data
 
 import com.guyuuan.app.find_author.core.data.media.MediaScanner
+import com.guyuuan.app.find_author.core.data.media.ScanStatus
+import com.guyuuan.app.find_author.core.data.model.BucketItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 /**
@@ -10,6 +15,8 @@ import javax.inject.Inject
  **/
 interface MediaRepository : BucketRepository, ImageRepository {
     suspend fun loadSystemBuckets()
+
+    fun loadBucketsImages(): Flow<ScanStatus<BucketItem>>
 }
 
 class DefaultMediaRepository @Inject constructor(
@@ -27,4 +34,12 @@ class DefaultMediaRepository @Inject constructor(
             }
         }
     }
+
+    override fun loadBucketsImages() = with(scanner) {
+        getSelectedBuckets().scamImages {
+            checkImageShouldUpdate(it)
+        }.flowOn(Dispatchers.IO)
+    }
+
+
 }

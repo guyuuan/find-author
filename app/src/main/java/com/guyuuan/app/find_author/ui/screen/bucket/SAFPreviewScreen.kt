@@ -72,7 +72,7 @@ fun SAFPreviewScreen(
                 title = { Text(text = title) },
                 navigationIcon = {
                     IconButton(onClick = {
-                        navigator.navigateUp()
+                        SAFPreviewUIEvent.Cancel { navigator.navigateUp() }
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Close,

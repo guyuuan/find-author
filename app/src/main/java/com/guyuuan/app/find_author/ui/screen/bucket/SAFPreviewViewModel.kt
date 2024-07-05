@@ -40,6 +40,7 @@ class SAFPreviewViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            mediaScanner.saveSAFPermission(navArgs.uri.toUri())
             val bucket = mediaScanner.getSAFBucketInfo(navArgs.uri.toUri())
             mediaScanner.scanSAFBucketsImages(navArgs.uri.toUri()).collect {
                 val success =
@@ -52,7 +53,7 @@ class SAFPreviewViewModel @Inject constructor(
 
                     is ScanStatus.Done -> _uiState.value = success.copy(running = false)
 
-                    is ScanStatus.Error -> {
+                     else -> {
 
                     }
                 }
@@ -66,7 +67,6 @@ class SAFPreviewViewModel @Inject constructor(
                 val state = uiState.value
                 if (state is SAFPreviewUIState.Success) {
                     val cover = state.images.firstOrNull()
-                    mediaScanner.saveSAFPermission(state.bucket.uri!!.toUri())
                     mediaRepository.addBucket(
                         state.bucket.copy(
                             selected = true,
@@ -74,6 +74,10 @@ class SAFPreviewViewModel @Inject constructor(
                         )
                     )
                 }
+            }
+
+            is SAFPreviewUIEvent.Cancel -> {
+                mediaScanner.removeSAFPermission(navArgs.uri.toUri())
             }
         }
     }
@@ -92,4 +96,5 @@ sealed interface SAFPreviewUIEvent : UiEvent {
     data class Confirm(
         override val onSuccess: UiEventOnSuccess, override val onFailed: UiEventOnFailed? = null
     ) : SAFPreviewUIEvent
+    data class Cancel(override val onSuccess: UiEventOnSuccess):SAFPreviewUIEvent
 }

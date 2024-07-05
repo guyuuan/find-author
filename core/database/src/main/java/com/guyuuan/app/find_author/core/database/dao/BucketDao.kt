@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.guyuuan.app.find_author.core.database.model.Bucket
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface BucketDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBucket(vararg item: Bucket)
 
     @Query("SELECT * FROM bucket ORDER BY modifiedDate DESC")

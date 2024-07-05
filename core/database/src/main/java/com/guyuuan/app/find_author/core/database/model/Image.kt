@@ -17,9 +17,18 @@
 package com.guyuuan.app.find_author.core.database.model
 
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    foreignKeys = [
+//        ForeignKey(
+//            entity = Bucket::class,
+//            parentColumns = ["id"],
+//            childColumns = ["bucketId"],
+//            onDelete = ForeignKey.CASCADE
+//        )
+    ])
 data class Image(
     @PrimaryKey
     val id: String,
