@@ -18,35 +18,30 @@ package com.guyuuan.app.find_author.core.data
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.map
 import com.guyuuan.app.find_author.core.data.extension.toImage
-import com.guyuuan.app.find_author.core.data.extension.toImageItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.database.dao.ImageDao
+import com.guyuuan.app.find_author.core.database.model.Image
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface ImageRepository {
 
-    fun getAllImages(): Flow<List<ImageItem>>
+    fun getAllImages(): Flow<List<Image>>
 
-    suspend fun checkImageShouldUpdate(image: ImageItem)
-    suspend fun updateImage(vararg image: ImageItem)
+    suspend fun checkImageShouldUpdate(image: Image)
+    suspend fun updateImage(vararg image: Image)
     fun getImagesByBucket(
-        bucketId: Long,
-        config: PagingConfig = PagingConfig(pageSize = 30)
-    ): Flow<PagingData<ImageItem>>
+        bucketId: Long, config: PagingConfig = PagingConfig(pageSize = 30)
+    ): Pager<Int, ImageItem>
 
     fun getHomeImages(
-        showHide: Boolean = false,
-        config: PagingConfig = PagingConfig(pageSize = 30)
-    ): Flow<PagingData<ImageItem>>
+        showHide: Boolean = false, config: PagingConfig = PagingConfig(pageSize = 30)
+    ): Pager<Int, ImageItem>
 
-    fun getBucketCover(bucketId: Long): ImageItem?
+    fun getBucketCover(bucketId: Long): Image?
 
-    suspend fun addImage(vararg image: ImageItem)
+    suspend fun addImage(vararg image: Image)
 
     suspend fun deleteImageByBucket(bucketId: Long)
 
@@ -56,52 +51,37 @@ class DefaultImageRepository @Inject constructor(
     private val imageDao: ImageDao
 ) : ImageRepository {
 
-    override fun getAllImages() = imageDao.getImages().map {
-        it.map { image ->
-            image.toImageItem()
-        }
-    }
+    override fun getAllImages() = imageDao.getImages()
 
-    override fun getImagesByBucket(bucketId: Long, config: PagingConfig) =
-        Pager(config = config) {
-            imageDao.getBuketImages(bucketId)
-        }.flow.map { pagingData ->
-            pagingData.map { it.toImageItem() }
-        }
+    override fun getImagesByBucket(bucketId: Long, config: PagingConfig) = Pager(config = config) {
+        imageDao.getBuketImages(bucketId)
+    }
 
     override fun getHomeImages(
-        showHide: Boolean,
-        config: PagingConfig
+        showHide: Boolean, config: PagingConfig
     ) = Pager(config) {
         imageDao.getHomeImages(showHide)
-    }.flow.map { pagingData ->
-        pagingData.map { it.toImageItem() }
     }
 
 
-    override fun getBucketCover(bucketId: Long) = imageDao.getBuketCover(bucketId)?.toImageItem()
+    override fun getBucketCover(bucketId: Long) = imageDao.getBuketCover(bucketId)?.toImage()
 
-    override suspend fun addImage(vararg image: ImageItem) = imageDao.insertImage(*image.map {
-        it.toImage()
-    }.toTypedArray())
+    override suspend fun addImage(vararg image: Image) = imageDao.insertImage(*image)
 
     override suspend fun deleteImageByBucket(bucketId: Long) = imageDao.deleteBucketImage(bucketId)
 
-    override suspend fun checkImageShouldUpdate(image: ImageItem) {
-       val img = imageDao.getImageById(image.id)
-        if(img==null) {
+    override suspend fun checkImageShouldUpdate(image: Image) {
+        val img = imageDao.getImageById(image.id)
+        if (img == null) {
             addImage(image)
             return
         }
-        if(img != image.toImage() ){
+        if (img != image) {
             updateImage(image)
         }
     }
 
-
-    override suspend fun updateImage(vararg image: ImageItem) {
-        imageDao.updateImage(*image.map {
-            it.toImage()
-        }.toTypedArray())
+    override suspend fun updateImage(vararg image: Image) {
+        imageDao.updateImage(*image)
     }
 }

@@ -3,11 +3,12 @@ package com.guyuuan.app.find_author.ui.screen.home
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,8 +29,8 @@ import com.guyuuan.app.find_author.core.ui.compoments.Transform
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 /**
  * @author: Chen
@@ -75,29 +76,29 @@ private fun HomeScreen(
 
 @Composable
 private fun ImageGrid(modifier: Modifier = Modifier, images: Flow<PagingData<ImageItem>>) {
-    val pagingData = images.collectAsLazyPagingItems(
-        Dispatchers.Default
-    )
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Fixed(4),
+    val pagingData = images.collectAsLazyPagingItems()
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(4),
         modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalItemSpacing = 8.dp
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(count = pagingData.itemCount) { index ->
             val image = pagingData[index] ?: return@items
-//            Transform(
-//                modifier = Modifier.fillMaxSize(),
-//                key = image.id,
-//            ) {
+            Transform(
+                modifier = Modifier.fillMaxSize(),
+                key = image.id,
+                delay = 300
+            ) {
                 ImageGridItem(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .aspectRatio(1f)
                         .clip(MaterialTheme.shapes.small),
                     image = image
                 )
-//            }
+            }
         }
     }
 }
@@ -105,11 +106,15 @@ private fun ImageGrid(modifier: Modifier = Modifier, images: Flow<PagingData<Ima
 @Composable
 fun ImageGridItem(modifier: Modifier = Modifier, image: ImageItem) {
     SubcomposeAsyncImage(
-        model = image.uri, contentDescription = null, error = { e ->
+        model = image, contentDescription = null,
+        onError = {
+            Timber.tag("ImageGridItem").e(it.result.throwable)
+        },
+        error = { e ->
             Text(
                 image.mimeType + "\n" + e.result.throwable.toString(),
                 color = MaterialTheme.colorScheme.error
             )
-        }, contentScale = ContentScale.FillWidth, modifier = modifier
+        }, contentScale = ContentScale.Crop, modifier = modifier
     )
 }

@@ -30,11 +30,11 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val mediaRepository: MediaRepository,
 ) : BaseViewModel<HomeUiState, HomeUiEvent>() {
-    private val pagingData = mediaRepository.getHomeImages().cachedIn(viewModelScope)
+    private val pager = mediaRepository.getHomeImages().flow.cachedIn(viewModelScope)
     override val uiState: StateFlow<HomeUiState> =
         mediaRepository.loadBucketsImages().map<ScanStatus<BucketItem>, HomeUiState> { scanStatus ->
                 HomeUiState.Success(
-                    images = pagingData, scanStatus = scanStatus
+                    images = pager, scanStatus = scanStatus
                 )
             }.catch {
                 emit(HomeUiState.Error(it))

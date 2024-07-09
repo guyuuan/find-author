@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
 import android.provider.MediaStore
+import android.util.Size
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.database.model.BucketType
@@ -13,6 +14,7 @@ import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.isActive
 import javax.inject.Inject
 
@@ -111,6 +113,7 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
             val pathIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             val relativePathIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
             val mimeTypeIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
+            MediaStore.Images.Thumbnails._ID
             while (it.moveToNext() && currentCoroutineContext().isActive) {
                 try {
                     val bucketID = it.getLong(bucketIdIndex)
@@ -145,6 +148,7 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
                 }
             }
         }
+    }.onCompletion {
         emit(ScanStatus.Done())
     }.flowOn(Dispatchers.IO)
 }

@@ -3,8 +3,11 @@ package com.guyuuan.app.find_author.core.data.media
 import androidx.core.net.toUri
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.database.model.Bucket
 import com.guyuuan.app.find_author.core.database.model.BucketType
+import com.guyuuan.app.find_author.core.database.model.Image
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.transform
 import javax.inject.Inject
 
@@ -50,7 +53,7 @@ class DefaultMediaScanner @Inject constructor(
                         check(bucket.uri != null) {
                             "bucket uri is null"
                         }
-                        scanSAFBucketsImages(bucket.uri.toUri()).collect {
+                        scanSAFBucketsImages(bucket.uri!!.toUri()).collect {
                             if (it is ScanStatus.Running) {
                                 update(it.data.copy(bucketId = bucket.id))
                             }
@@ -65,6 +68,7 @@ class DefaultMediaScanner @Inject constructor(
                 emit(ScanStatus.Error(e))
             }
         }
+    }.onCompletion {
         emit(ScanStatus.Done())
     }
 }

@@ -9,14 +9,5 @@ import com.guyuuan.app.find_author.core.database.model.BucketType
  * @createTime: 6/11/24 09:17
  * @description:
  **/
-data class BucketItem(
-    val id: Long,
-    val name: String,
-    val uri:String?=null,
-    val relativePath: String,
-    val selected: Boolean = false,
-    val modifiedDate:Long,
-    val coverUri:String?,
-    val type:BucketType,
-    val hide:Boolean=false
-)
+
+typealias BucketItem = com.guyuuan.app.find_author.core.database.model.Bucket

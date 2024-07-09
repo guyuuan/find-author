@@ -27,9 +27,9 @@ import javax.inject.Inject
 class ChooseBucketsViewModel @Inject constructor(
     private val mediaRepository: MediaRepository
 ) : BaseViewModel<ChooseBucketsUiState, ChooseBucketsEvent>() {
+    private val pager = mediaRepository.getPagingBuckets().flow.cachedIn(viewModelScope)
     override val uiState: StateFlow<ChooseBucketsUiState> = flow<ChooseBucketsUiState> {
-        val flow = mediaRepository.getPagingBuckets().cachedIn(viewModelScope)
-        emit(ChooseBucketsUiState.Success(flow))
+        emit(ChooseBucketsUiState.Success(pager))
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000),

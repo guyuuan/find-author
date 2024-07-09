@@ -10,9 +10,11 @@ import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.database.model.BucketType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import javax.inject.Inject
 
@@ -83,7 +85,7 @@ class DefaultSAFMediaScanner @Inject constructor(@ApplicationContext private val
             emit(ScanStatus.Done())
         }
     }
-
+        .flowOn(Dispatchers.IO)
     override fun getSAFBucketInfo(uri: Uri): BucketItem {
         val file =
             DocumentFile.fromTreeUri(context, uri) ?: throw Error("Uri[$uri] isn't a tree uri")

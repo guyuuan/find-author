@@ -39,6 +39,7 @@ class FindAuthor : Application(),ImageLoaderFactory{
             } else {
                 add(GifDecoder.Factory())
             }
+            add(ThumbnailFetcher.Factory())
         }.build()
     }
 }

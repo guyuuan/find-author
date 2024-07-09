@@ -8,6 +8,7 @@ import com.guyuuan.app.find_author.core.data.extension.toBucket
 import com.guyuuan.app.find_author.core.data.extension.toBucketItem
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.database.dao.BucketDao
+import com.guyuuan.app.find_author.core.database.model.Bucket
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -18,11 +19,11 @@ import javax.inject.Inject
  * @description:
  **/
 interface BucketRepository {
-    suspend fun addBucket(vararg bucket: BucketItem)
-    suspend fun deleteBucket(vararg bucket: BucketItem)
-    suspend fun updateBucket(vararg bucket: BucketItem)
+    suspend fun addBucket(vararg buckets: BucketItem)
+    suspend fun deleteBucket(vararg buckets: BucketItem)
+    suspend fun updateBucket(vararg buckets: BucketItem)
     fun getAllBuckets(): Flow<List<BucketItem>>
-    fun getPagingBuckets(config: PagingConfig = PagingConfig(pageSize = 10)): Flow<PagingData<BucketItem>>
+    fun getPagingBuckets(config: PagingConfig = PagingConfig(pageSize = 10)): Pager<Int,BucketItem>
     suspend fun getBucket(bucketId: Long): BucketItem?
     fun getSelectedBuckets(): Flow<List<BucketItem>>
 }
@@ -31,39 +32,25 @@ class DefaultBucketRepository @Inject constructor(
     private val bucketDao: BucketDao
 ) : BucketRepository {
 
-    override suspend fun addBucket(vararg bucket: BucketItem) = bucketDao.insertBucket(*bucket.map {
-        it.toBucket()
-    }.toTypedArray())
+    override suspend fun addBucket(vararg buckets: Bucket) = bucketDao.insertBucket(*buckets)
 
-    override suspend fun deleteBucket(vararg bucket: BucketItem) =
-        bucketDao.deleteBucket(*bucket.map {
-            it.toBucket()
-        }.toTypedArray())
+    override suspend fun deleteBucket(vararg buckets: Bucket) =
+        bucketDao.deleteBucket(*buckets)
 
-    override suspend fun updateBucket(vararg bucket: BucketItem) =
-        bucketDao.updateBucket(*bucket.map {
-            it.toBucket()
-        }.toTypedArray())
+    override suspend fun updateBucket(vararg buckets: Bucket) =
+        bucketDao.updateBucket(*buckets)
 
-    override fun getAllBuckets() = bucketDao.getBuckets().map { buckets ->
-        buckets.map {
-            it.toBucketItem()
-        }
-    }
+    override fun getAllBuckets() = bucketDao.getBuckets()
 
-    override suspend fun getBucket(bucketId: Long) = bucketDao.getBucket(bucketId)?.toBucketItem()
+    override suspend fun getBucket(bucketId: Long) = bucketDao.getBucket(bucketId)
 
-    override fun getSelectedBuckets() = bucketDao.getSelectedBuckets().map { buckets ->
-        buckets.map {
-            it.toBucketItem()
-        }
-    }
+    override fun getSelectedBuckets() = bucketDao.getSelectedBuckets()
+
 
     override fun getPagingBuckets(config: PagingConfig) =
         Pager(config = config) {
             bucketDao.getPagingBuckets()
-        }.flow.map {
-            it.map { b -> b.toBucketItem() }
         }
+
 }
 

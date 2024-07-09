@@ -14,13 +14,13 @@ import androidx.room.TypeConverters
 data class Bucket(
     @PrimaryKey(autoGenerate = true) val id: Long,
     val name: String,
-    val uri: String?,
+    val uri: String?=null,
     val relativePath: String,
     val selected: Boolean = false,
     val modifiedDate: Long,
     val coverUri: String?,
     val type: BucketType,
-    val hide: Boolean
+    val hide: Boolean=false
 )
 
 sealed class BucketType {
