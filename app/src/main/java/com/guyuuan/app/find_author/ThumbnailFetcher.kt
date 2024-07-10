@@ -25,6 +25,7 @@ import com.guyuuan.app.find_author.core.data.model.ImageItem
 import okio.buffer
 import okio.sink
 import okio.source
+import timber.log.Timber
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -44,28 +45,26 @@ class ThumbnailFetcher(
     override suspend fun fetch(): FetchResult? {
         val contentResolver = options.context.contentResolver
         val uri = data.uri.toUri()
+        val option = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        BitmapFactory.decodeStream(contentResolver.openInputStream(uri),null,option)
+        val width = option.outWidth
+        val height = option.outHeight
+        val displayWidth = options.size.width.pxOrElse {
+            throw IllegalArgumentException("No size specified")
+        }
+        val displayHeight = height*displayWidth/width
+       val size = Size(displayWidth, displayHeight)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val bitmap = contentResolver.loadThumbnail(
                 uri,
-                Size(options.size.width.pxOrElse { 400 }, options.size.height.pxOrElse { 400 }),
+                size,
                 null
             )
-            val baos = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-//            val buffer = ByteBuffer.allocateDirect(bitmap.byteCount)
-//            bitmap.copyPixelsToBuffer(buffer)
-//            check(buffer.hasArray()  ){
-//                "Buffer has no array."
-//            }
-            return SourceResult(
-                source = ImageSource(
-                    source = ByteArrayInputStream(baos.toByteArray()).source().buffer(),
-//                    source = ByteArrayInputStream(buffer.array())
-//                        .source().buffer(),
-                    context = options.context,
-                    metadata = ContentMetadata(uri)
-                ),
-                mimeType = contentResolver.getType(uri),
+            return DrawableResult(
+                drawable = bitmap.toDrawable(options.context.resources),
+                isSampled = false,
                 dataSource = DataSource.DISK
             )
         } else {

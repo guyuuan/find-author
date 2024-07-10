@@ -264,13 +264,6 @@ private abstract class WelcomeStep {
         context(WelcomeScreenScope)
         @Composable
         override fun Content(modifier: Modifier) {
-            val getSAF =
-                rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
-                    it?.let { uri ->
-                        navigator.navigate(SAFPreviewScreenDestination(SAFPreviewArgs(uri = uri.toString())))
-                    }
-
-                }
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val selectedBuckets = remember(uiState) {
                 when (val state = uiState) {
@@ -312,14 +305,6 @@ private abstract class WelcomeStep {
                     Text(
                         "Let's get started choose your buckets",
                         style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-                TextButton(modifier = modifier, onClick = {
-                    getSAF.launch(null)
-//                    navigator.navigate(ChooseBucketsScreenDestination)
-                }) {
-                    Text(
-                        "SAF", style = MaterialTheme.typography.bodyLarge
                     )
                 }
             }

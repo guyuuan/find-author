@@ -1,7 +1,9 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.guyuuan.app.find_author.ui.screen.bucket
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,6 +52,7 @@ import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.ui.compoments.Transform
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.SAFPreviewScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import timber.log.Timber
 
@@ -65,6 +69,13 @@ import timber.log.Timber
 fun ChooseBucketsScreen(
     viewModel: ChooseBucketsViewModel = hiltViewModel(), navigator: DestinationsNavigator
 ) {
+    val getSAF =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) {
+            it?.let { uri ->
+                navigator.navigate(SAFPreviewScreenDestination(SAFPreviewArgs(uri = uri.toString())))
+            }
+
+        }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(topBar = {
         TopAppBar(title = { Text(text = "Choose buckets") }, navigationIcon = {
@@ -74,6 +85,12 @@ fun ChooseBucketsScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
             }
         })
+    }, floatingActionButton = {
+        FloatingActionButton(onClick = {
+            getSAF.launch(null)
+        }) {
+            Text("SAF")
+        }
     }) {
         Box(
             modifier = Modifier.padding(it)
