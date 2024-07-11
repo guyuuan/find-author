@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "50b85f75d1e9478c69ae2ec97cf61bd3",
+    "identityHash": "f43e18c227dbb8d809a0e9fa86ee35fd",
     "entities": [
       {
         "tableName": "Image",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `uri` TEXT NOT NULL, `path` TEXT, `dateAdded` INTEGER NOT NULL, `bucketId` INTEGER NOT NULL, `bucketName` TEXT, `relativePath` TEXT, `mimeType` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `uri` TEXT NOT NULL, `thumbnailUri` TEXT, `path` TEXT, `dateAdded` INTEGER NOT NULL, `bucketId` INTEGER NOT NULL, `bucketName` TEXT, `relativePath` TEXT, `mimeType` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -25,6 +25,12 @@
             "columnName": "uri",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "thumbnailUri",
+            "columnName": "thumbnailUri",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "path",
@@ -144,7 +150,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '50b85f75d1e9478c69ae2ec97cf61bd3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f43e18c227dbb8d809a0e9fa86ee35fd')"
     ]
   }
 }

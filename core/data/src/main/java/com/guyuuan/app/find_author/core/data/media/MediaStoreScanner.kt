@@ -3,8 +3,8 @@ package com.guyuuan.app.find_author.core.data.media
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.os.Build
 import android.provider.MediaStore
-import android.util.Size
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.database.model.BucketType
@@ -113,7 +113,11 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
             val pathIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             val relativePathIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.RELATIVE_PATH)
             val mimeTypeIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.MIME_TYPE)
-            MediaStore.Images.Thumbnails._ID
+            val thumbnailId = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                it.getColumnIndexOrThrow(MediaStore.Images.Thumbnails._ID)
+            } else {
+                null
+            }
             while (it.moveToNext() && currentCoroutineContext().isActive) {
                 try {
                     val bucketID = it.getLong(bucketIdIndex)
@@ -127,12 +131,22 @@ class AndroidMediaStoreScanner @Inject constructor(@ApplicationContext context: 
                     val uri = ContentUris.withAppendedId(
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
                     )
+                    val thumbnailUri = thumbnailId?.let { tid ->
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                            ContentUris.withAppendedId(
+                                MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, it.getLong(tid)
+                            )
+                        } else {
+                            null
+                        }
+                    }
                     emit(
                         ScanStatus.Running(
                             ImageItem(
                                 id = id.toString(),
                                 name = displayName,
                                 uri = uri.toString(),
+                                thumbnailUri = thumbnailUri?.toString(),
                                 path = path,
                                 mimeType = mimeType,
                                 dateAdded = dateAdded,

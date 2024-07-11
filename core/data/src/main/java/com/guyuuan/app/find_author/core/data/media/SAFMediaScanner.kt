@@ -94,7 +94,7 @@ class DefaultSAFMediaScanner @Inject constructor(@ApplicationContext private val
             id = uri.hashCode().toLong(),
             name = file.name ?: "unknown",
             uri = uri.toString(),
-            relativePath = file.name ?: "unknown",
+            relativePath = uri.path?:"unknown",
             coverUri = null,
             modifiedDate = file.lastModified(),
             type = BucketType.SAF

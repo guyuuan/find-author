@@ -48,5 +48,5 @@ dependencies {
     // Tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.androidx.navigation.compose)
+    api(libs.coil.compose)
 }

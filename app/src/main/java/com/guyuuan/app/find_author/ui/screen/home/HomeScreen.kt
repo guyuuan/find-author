@@ -23,12 +23,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
-import coil.compose.SubcomposeAsyncImage
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.ui.compoments.CoilImage
 import com.guyuuan.app.find_author.core.ui.compoments.Transform
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -92,7 +93,7 @@ private fun HomeScreen(
 private fun ImageGrid(modifier: Modifier = Modifier, images: Flow<PagingData<ImageItem>>) {
     val pagingData = images.collectAsLazyPagingItems()
     LazyVerticalGrid(
-        columns = GridCells.Fixed(4),
+        columns = GridCells.Fixed(2),
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -101,14 +102,15 @@ private fun ImageGrid(modifier: Modifier = Modifier, images: Flow<PagingData<Ima
         items(count = pagingData.itemCount) { index ->
             val image = pagingData[index] ?: return@items
             Transform(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f),
                 key = image.id,
                 delay = 300
             ) {
                 ImageGridItem(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
+                        .fillMaxSize()
                         .clip(MaterialTheme.shapes.small),
                     image = image
                 )
@@ -119,8 +121,10 @@ private fun ImageGrid(modifier: Modifier = Modifier, images: Flow<PagingData<Ima
 
 @Composable
 fun ImageGridItem(modifier: Modifier = Modifier, image: ImageItem) {
-    SubcomposeAsyncImage(
-        model = image, contentDescription = null,
+    CoilImage(
+        model = (image.thumbnailUri ?: image.uri).toUri(),
+        useThumbnails = true,
+        contentDescription = null,
         onError = {
             Timber.tag("ImageGridItem").e(it.result.throwable)
         },

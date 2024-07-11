@@ -18,7 +18,6 @@ package com.guyuuan.app.find_author.core.data
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import com.guyuuan.app.find_author.core.data.extension.toImage
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.database.dao.ImageDao
 import com.guyuuan.app.find_author.core.database.model.Image
@@ -64,7 +63,7 @@ class DefaultImageRepository @Inject constructor(
     }
 
 
-    override fun getBucketCover(bucketId: Long) = imageDao.getBuketCover(bucketId)?.toImage()
+    override fun getBucketCover(bucketId: Long) = imageDao.getBuketCover(bucketId)
 
     override suspend fun addImage(vararg image: Image) = imageDao.insertImage(*image)
 

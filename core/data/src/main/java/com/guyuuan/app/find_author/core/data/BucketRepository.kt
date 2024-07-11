@@ -4,13 +4,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.guyuuan.app.find_author.core.data.extension.toBucket
-import com.guyuuan.app.find_author.core.data.extension.toBucketItem
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.database.dao.BucketDao
 import com.guyuuan.app.find_author.core.database.model.Bucket
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**

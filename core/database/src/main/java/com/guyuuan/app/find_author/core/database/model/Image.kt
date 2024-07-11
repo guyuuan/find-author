@@ -34,6 +34,7 @@ data class Image(
     val id: String,
     val name: String,
     val uri: String,
+    val thumbnailUri:String?=null,
     val path: String? = null,
     val dateAdded: Long,
     val bucketId: Long,
