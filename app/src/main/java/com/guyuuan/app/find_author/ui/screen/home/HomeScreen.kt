@@ -1,13 +1,20 @@
 package com.guyuuan.app.find_author.ui.screen.home
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -29,8 +36,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.data.model.PagingUiMode
 import com.guyuuan.app.find_author.core.ui.compoments.CoilImage
-import com.guyuuan.app.find_author.core.ui.compoments.Transform
+import com.guyuuan.app.find_author.core.ui.compoments.TransformBox
+import com.guyuuan.app.find_author.core.ui.util.plus
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ChooseBucketsScreenDestination
@@ -54,7 +63,7 @@ fun HomeScreen(navigator: DestinationsNavigator, viewModel: HomeViewModel = hilt
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
-        }
+        }, contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) {
         HomeScreen(Modifier.padding(it), viewModel)
     }
@@ -65,14 +74,18 @@ private fun HomeScreen(
     modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    val safeContentPadding = WindowInsets.safeContent.asPaddingValues()
     Crossfade(uiState, modifier = modifier, label = "HomeScreen") { state ->
         when (state) {
             is HomeUiState.Loading -> {
             }
 
             is HomeUiState.Success -> {
-                ImageGrid(modifier = Modifier, images = state.images)
+                ImageGrid(
+                    modifier = Modifier.consumeWindowInsets(WindowInsets.safeContent),
+                    safeContentPadding = safeContentPadding,
+                    images = state.images
+                )
             }
 
             is HomeUiState.Error -> {
@@ -90,31 +103,56 @@ private fun HomeScreen(
 }
 
 @Composable
-private fun ImageGrid(modifier: Modifier = Modifier, images: Flow<PagingData<ImageItem>>) {
+private fun ImageGrid(
+    modifier: Modifier = Modifier,
+    images: Flow<PagingData<PagingUiMode<ImageItem>>>,
+    safeContentPadding: PaddingValues
+) {
     val pagingData = images.collectAsLazyPagingItems()
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Fixed(4),
         modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 16.dp) + safeContentPadding,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(count = pagingData.itemCount) { index ->
+        items(count = pagingData.itemCount, span = {
+            val item = pagingData[it]
+            if (item is PagingUiMode.Item) GridItemSpan(1) else GridItemSpan(maxLineSpan)
+        }) { index ->
             val image = pagingData[index] ?: return@items
-            Transform(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f),
-                key = image.id,
-                delay = 300
-            ) {
-                ImageGridItem(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(MaterialTheme.shapes.small),
-                    image = image
-                )
+            when (image) {
+                is PagingUiMode.Item -> {
+                    TransformBox(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        enter = scaleIn(),
+                        exit = scaleOut(),
+                        key = image.data.id,
+                    ) {
+                        ImageGridItem(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(MaterialTheme.shapes.small),
+                            image = image.data
+                        )
+                    }
+                }
+
+                is PagingUiMode.Header -> TransformBox(
+                    key = image.timeString,
+                    modifier = Modifier.fillMaxWidth(),
+                    delay = 100,
+                ) {
+                    Text(
+                        image.timeString,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
+                }
             }
+
         }
     }
 }

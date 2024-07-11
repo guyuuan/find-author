@@ -39,4 +39,5 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     api(libs.androidx.paging3.runtime)
     api(libs.androidx.documentFile)
+    api(libs.kotlinx.datetime)
 }

@@ -7,6 +7,7 @@ import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.media.ScanStatus
 import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.data.model.PagingUiMode
 import com.guyuuan.app.find_author.core.ui.BaseViewModel
 import com.guyuuan.app.find_author.core.ui.UiEvent
 import com.guyuuan.app.find_author.core.ui.UiState
@@ -30,17 +31,18 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val mediaRepository: MediaRepository,
 ) : BaseViewModel<HomeUiState, HomeUiEvent>() {
-    private val pager = mediaRepository.getHomeImages().flow.cachedIn(viewModelScope)
+    private val pager =
+        mediaRepository.getHomeImages().flowOn(Dispatchers.Default).cachedIn(viewModelScope)
     override val uiState: StateFlow<HomeUiState> =
         mediaRepository.loadBucketsImages().map<ScanStatus<BucketItem>, HomeUiState> { scanStatus ->
-                HomeUiState.Success(
-                    images = pager, scanStatus = scanStatus
-                )
-            }.catch {
-                emit(HomeUiState.Error(it))
-            }.stateIn(
-                viewModelScope, started = SharingStarted.Lazily, HomeUiState.Loading
+            HomeUiState.Success(
+                images = pager, scanStatus = scanStatus
             )
+        }.catch {
+            emit(HomeUiState.Error(it))
+        }.stateIn(
+            viewModelScope, started = SharingStarted.Lazily, HomeUiState.Loading
+        )
 
     override suspend fun onEvent(event: HomeUiEvent) {
     }
@@ -49,7 +51,8 @@ class HomeViewModel @Inject constructor(
 sealed interface HomeUiState : UiState {
     data object Loading : HomeUiState
     data class Success(
-        val images: Flow<PagingData<ImageItem>>, val scanStatus: ScanStatus<BucketItem>
+        val images: Flow<PagingData<PagingUiMode<ImageItem>>>,
+        val scanStatus: ScanStatus<BucketItem>
     ) : HomeUiState
 
     data class Error(val error: Throwable) : HomeUiState

@@ -49,7 +49,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil.compose.SubcomposeAsyncImage
 import com.guyuuan.app.find_author.core.data.model.BucketItem
-import com.guyuuan.app.find_author.core.ui.compoments.Transform
+import com.guyuuan.app.find_author.core.ui.compoments.TransformBox
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.SAFPreviewScreenDestination
@@ -144,7 +144,7 @@ private fun SuccessScreen(
 
         items(key = buckets.itemKey { it.id }, count = buckets.itemCount) {
             val item = buckets[it] ?: return@items
-            Transform(
+            TransformBox(
                 modifier = Modifier.fillMaxSize(),
                 key = item.id,
                 enter = fadeIn() + scaleIn(),

@@ -18,10 +18,17 @@ package com.guyuuan.app.find_author.core.data
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.insertSeparators
+import androidx.paging.map
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.data.model.PagingUiMode
+import com.guyuuan.app.find_author.core.data.util.asLocalDateTime
+import com.guyuuan.app.find_author.core.data.util.formatedDateString
 import com.guyuuan.app.find_author.core.database.dao.ImageDao
 import com.guyuuan.app.find_author.core.database.model.Image
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface ImageRepository {
@@ -36,7 +43,7 @@ interface ImageRepository {
 
     fun getHomeImages(
         showHide: Boolean = false, config: PagingConfig = PagingConfig(pageSize = 30)
-    ): Pager<Int, ImageItem>
+    ): Flow<PagingData<PagingUiMode<ImageItem>>>
 
     fun getBucketCover(bucketId: Long): Image?
 
@@ -60,6 +67,23 @@ class DefaultImageRepository @Inject constructor(
         showHide: Boolean, config: PagingConfig
     ) = Pager(config) {
         imageDao.getHomeImages(showHide)
+    }.flow.map { pagingData ->
+        pagingData.map<ImageItem, PagingUiMode<ImageItem>> { PagingUiMode.Item(it) }
+            .insertSeparators { before, after ->
+                if (after != null && after is PagingUiMode.Item) {
+                    val afterTime = after.data.dateAdded.asLocalDateTime
+                    val beforeTime = before?.data?.dateAdded?.asLocalDateTime
+                        ?: return@insertSeparators PagingUiMode.Header(afterTime.formatedDateString)
+                    if (afterTime.dayOfMonth != beforeTime.dayOfMonth) {
+                        PagingUiMode.Header(afterTime.formatedDateString)
+                    } else {
+                        null
+                    }
+
+                } else {
+                    null
+                }
+            }
     }
 
 
