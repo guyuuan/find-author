@@ -12,7 +12,7 @@ import com.guyuuan.app.find_author.core.database.model.Image
 import kotlinx.coroutines.flow.Flow
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 6/11/24 14:49
  * @description:
  **/

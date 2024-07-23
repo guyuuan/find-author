@@ -28,7 +28,7 @@ import kotlin.math.abs
 
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 7/4/24 10:52
  * @description: Copy from androidx.compose.material3.AnchoredDraggable.kt
  **/

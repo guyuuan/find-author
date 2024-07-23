@@ -47,7 +47,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 /**
- * @author: chunjinchen
+ * @author: guyuuan
  * @createTime: 7/23/24 09:42
  * @description:
  **/

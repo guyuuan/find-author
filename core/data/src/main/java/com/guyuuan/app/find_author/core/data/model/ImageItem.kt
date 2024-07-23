@@ -1,7 +1,7 @@
 package com.guyuuan.app.find_author.core.data.model
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 6/7/24 11:31
  * @description:
  **/

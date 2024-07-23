@@ -17,7 +17,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageScope
 
 /**
- * @author: chunjinchen
+ * @author: guyuuan
  * @createTime: 7/11/24 09:45
  * @description:
  **/

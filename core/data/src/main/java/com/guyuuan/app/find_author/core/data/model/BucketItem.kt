@@ -5,7 +5,7 @@ import android.provider.MediaStore
 import com.guyuuan.app.find_author.core.database.model.BucketType
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 6/11/24 09:17
  * @description:
  **/

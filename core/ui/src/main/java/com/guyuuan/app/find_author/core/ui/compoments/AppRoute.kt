@@ -1,7 +1,7 @@
 package com.guyuuan.app.find_author.core.ui.compoments
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 6/11/24 10:47
  * @description:
  **/

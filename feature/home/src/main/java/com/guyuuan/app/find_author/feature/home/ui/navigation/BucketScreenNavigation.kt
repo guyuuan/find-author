@@ -1,7 +1,7 @@
 package com.guyuuan.app.find_author.feature.home.ui.navigation
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 6/12/24 15:44
  * @description:
  **/

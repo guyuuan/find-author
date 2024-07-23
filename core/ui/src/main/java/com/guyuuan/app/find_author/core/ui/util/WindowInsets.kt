@@ -3,7 +3,7 @@ package com.guyuuan.app.find_author.core.ui.util
 import androidx.compose.foundation.layout.WindowInsets
 
 /**
- * @author: chunjinchen
+ * @author: guyuuan
  * @createTime: 7/23/24 15:06
  * @description:
  **/

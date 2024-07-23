@@ -6,7 +6,7 @@ import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 
 /**
- * @author: Chen
+ * @author: guyuuan
  * @createTime: 6/11/24 14:50
  * @description:
  **/
