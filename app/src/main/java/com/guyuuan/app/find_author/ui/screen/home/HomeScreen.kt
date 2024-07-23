@@ -1,9 +1,16 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.guyuuan.app.find_author.ui.screen.home
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -31,9 +38,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.data.model.PagingUiMode
@@ -43,8 +49,8 @@ import com.guyuuan.app.find_author.core.ui.util.plus
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ChooseBucketsScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ImageDetailScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import kotlinx.coroutines.flow.Flow
 import timber.log.Timber
 
 /**
@@ -54,61 +60,77 @@ import timber.log.Timber
  **/
 @Destination<RootGraph>
 @Composable
-fun HomeScreen(navigator: DestinationsNavigator, viewModel: HomeViewModel = hiltViewModel()) {
+fun SharedTransitionScope.HomeScreen(
+    navigator: DestinationsNavigator,
+    viewModel: HomeViewModel,
+    animatedVisibilityScope: AnimatedVisibilityScope
+) {
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 navigator.navigate(ChooseBucketsScreenDestination)
-            }
-            ) {
+            }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
         }, contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) {
-        HomeScreen(Modifier.padding(it), viewModel)
+        HomeScreen(
+            Modifier.padding(top = it.calculateTopPadding()),
+            viewModel,
+            navigator,
+            animatedVisibilityScope
+        )
     }
 }
 
 @Composable
-private fun HomeScreen(
-    modifier: Modifier = Modifier, viewModel: HomeViewModel = hiltViewModel()
+private fun SharedTransitionScope.HomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel,
+    navigator: DestinationsNavigator,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val safeContentPadding = WindowInsets.safeContent.asPaddingValues()
-    Crossfade(uiState, modifier = modifier, label = "HomeScreen") { state ->
-        when (state) {
-            is HomeUiState.Loading -> {
-            }
+    when (val state = uiState) {
+        is HomeUiState.Loading -> {
+        }
 
-            is HomeUiState.Success -> {
-                ImageGrid(
-                    modifier = Modifier.consumeWindowInsets(WindowInsets.safeContent),
-                    safeContentPadding = safeContentPadding,
-                    images = state.images
-                )
-            }
+        is HomeUiState.Success -> {
+            val images = state.images.collectAsLazyPagingItems()
+            ImageGrid(
+                modifier = modifier then Modifier.consumeWindowInsets(WindowInsets.safeContent),
+                safeContentPadding = safeContentPadding,
+                images = images,
+                onImageClick = {
+                    navigator.navigate(ImageDetailScreenDestination.invoke(targetIndex = it))
+                },
+                animatedVisibilityScope = animatedVisibilityScope
+            )
+        }
 
-            is HomeUiState.Error -> {
-                Text(
-                    state.error.toString(),
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp)
-                        .fillMaxSize(),
-                    textAlign = TextAlign.Center
-                )
-            }
+        is HomeUiState.Error -> {
+            Text(
+                state.error.toString(),
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .padding(horizontal = 24.dp)
+                    .fillMaxSize(),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
 
 @Composable
-private fun ImageGrid(
+private fun SharedTransitionScope.ImageGrid(
     modifier: Modifier = Modifier,
-    images: Flow<PagingData<PagingUiMode<ImageItem>>>,
-    safeContentPadding: PaddingValues
+    images: LazyPagingItems<PagingUiMode<ImageItem>>,
+    safeContentPadding: PaddingValues,
+    onImageClick: (index: Int) -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    val pagingData = images.collectAsLazyPagingItems()
+
     LazyVerticalGrid(
         columns = GridCells.Fixed(4),
         modifier = modifier,
@@ -116,17 +138,21 @@ private fun ImageGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(count = pagingData.itemCount, span = {
-            val item = pagingData[it]
+        items(count = images.itemCount, span = {
+            val item = images[it]
             if (item is PagingUiMode.Item) GridItemSpan(1) else GridItemSpan(maxLineSpan)
         }) { index ->
-            val image = pagingData[index] ?: return@items
+            val image = images[index] ?: return@items
             when (image) {
                 is PagingUiMode.Item -> {
                     TransformBox(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(1f),
+                            .aspectRatio(1f)
+                            .sharedElement(
+                                rememberSharedContentState(image.realIndex),
+                                animatedVisibilityScope
+                            ),
                         enter = scaleIn(),
                         exit = scaleOut(),
                         key = image.data.id,
@@ -134,8 +160,18 @@ private fun ImageGrid(
                         ImageGridItem(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(MaterialTheme.shapes.small),
-                            image = image.data
+                                .clip(MaterialTheme.shapes.small)
+                                .clickable {
+                                    onImageClick(image.realIndex)
+                                }
+                                .sharedElement(
+                                    rememberSharedContentState(key = "image/${image.realIndex}"),
+                                    animatedVisibilityScope,
+                                    boundsTransform = { _, _ ->
+                                        tween(durationMillis = 1000)
+                                    }
+                                ),
+                            image = image.data,
                         )
                     }
                 }
@@ -171,6 +207,8 @@ fun ImageGridItem(modifier: Modifier = Modifier, image: ImageItem) {
                 image.mimeType + "\n" + e.result.throwable.toString(),
                 color = MaterialTheme.colorScheme.error
             )
-        }, contentScale = ContentScale.Crop, modifier = modifier
+        },
+        contentScale = ContentScale.Crop,
+        modifier = modifier
     )
 }

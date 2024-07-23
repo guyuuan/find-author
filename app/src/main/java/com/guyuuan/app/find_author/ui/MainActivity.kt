@@ -36,7 +36,6 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 App { padding, navController ->
                     MainNavigation(
-                        navController = navController,
                         modifier = Modifier.padding(padding)
                     )
                 }

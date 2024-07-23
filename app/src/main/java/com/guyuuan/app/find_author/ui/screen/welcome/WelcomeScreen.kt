@@ -76,7 +76,6 @@ import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestina
 import com.ramcosta.composedestinations.generated.destinations.SAFPreviewScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.WelcomeScreenDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.popUpTo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -143,7 +142,7 @@ fun FloatActionButton(
                 } else {
                     viewModel.dispatch(WelcomeEvent.Confirm(onSuccess = {
                         navigator.navigate(HomeScreenDestination) {
-                            popUpTo(WelcomeScreenDestination.route) {
+                            popUpTo(WelcomeScreenDestination) {
                                 inclusive = true
                             }
                         }

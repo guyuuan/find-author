@@ -45,6 +45,10 @@ interface ImageRepository {
         showHide: Boolean = false, config: PagingConfig = PagingConfig(pageSize = 30)
     ): Flow<PagingData<PagingUiMode<ImageItem>>>
 
+    fun getImages(
+        showHide: Boolean = false, config: PagingConfig = PagingConfig(pageSize = 10)
+    ): Flow<PagingData<ImageItem>>
+
     fun getBucketCover(bucketId: Long): Image?
 
     suspend fun addImage(vararg image: Image)
@@ -68,8 +72,10 @@ class DefaultImageRepository @Inject constructor(
     ) = Pager(config) {
         imageDao.getHomeImages(showHide)
     }.flow.map { pagingData ->
-        pagingData.map<ImageItem, PagingUiMode<ImageItem>> { PagingUiMode.Item(it) }
-            .insertSeparators { before, after ->
+        var index = 0
+        pagingData.map<ImageItem, PagingUiMode<ImageItem>> {
+            PagingUiMode.Item(it,index++)
+        }.insertSeparators { before, after ->
                 if (after != null && after is PagingUiMode.Item) {
                     val afterTime = after.data.dateAdded.asLocalDateTime
                     val beforeTime = before?.data?.dateAdded?.asLocalDateTime
@@ -85,6 +91,12 @@ class DefaultImageRepository @Inject constructor(
                 }
             }
     }
+
+    override fun getImages(
+        showHide: Boolean, config: PagingConfig
+    ) = Pager(config) {
+        imageDao.getHomeImages(showHide)
+    }.flow
 
 
     override fun getBucketCover(bucketId: Long) = imageDao.getBuketCover(bucketId)

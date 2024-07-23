@@ -14,20 +14,35 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.guyuuan.app.find_author.ui
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
-import com.guyuuan.app.find_author.core.ui.locals.LocalNavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.guyuuan.app.find_author.ui.screen.home.HomeViewModel
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.generated.NavGraphs
+import com.ramcosta.composedestinations.generated.destinations.HomeScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.ImageDetailScreenDestination
+import com.ramcosta.composedestinations.navigation.dependency
+import com.ramcosta.composedestinations.navigation.destination
 
 @Composable
-fun MainNavigation(modifier: Modifier, navController: NavHostController) {
-
-//    CompositionLocalProvider(LocalNavController provides navController) {
-        DestinationsNavHost(NavGraphs.root, modifier = modifier)
-//    }
+fun MainNavigation(modifier: Modifier) {
+    SharedTransitionLayout(modifier=modifier) {
+        DestinationsNavHost(NavGraphs.root, modifier = Modifier.fillMaxSize(), dependenciesContainerBuilder = {
+            dependency(this@SharedTransitionLayout)
+            destination(HomeScreenDestination) {
+                dependency(hiltViewModel<HomeViewModel>(navBackStackEntry))
+            }
+            destination(ImageDetailScreenDestination) {
+                dependency(hiltViewModel<HomeViewModel>(navController.getBackStackEntry(destination.route)))
+            }
+        })
+    }
 }

@@ -161,7 +161,6 @@ private fun ImageList(modifier: Modifier = Modifier, images: List<ImageItem>) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(MaterialTheme.shapes.medium)
-                    .animateItemPlacement()
             )
 
         }

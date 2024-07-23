@@ -10,5 +10,5 @@ sealed class PagingUiMode<T> {
 
     data class Header<T>(val timeString: String, override val data: T?=null) : PagingUiMode<T>()
 
-    data class Item<T>(override val data: T) : PagingUiMode<T>()
+    data class Item<T>(override val data: T,val realIndex:Int) : PagingUiMode<T>()
 }

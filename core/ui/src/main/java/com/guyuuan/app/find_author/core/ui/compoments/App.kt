@@ -27,7 +27,6 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun App(
-    modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     content: @Composable (PaddingValues, NavHostController) -> Unit
 ) {
