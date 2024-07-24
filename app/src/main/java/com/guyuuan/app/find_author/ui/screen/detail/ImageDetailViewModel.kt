@@ -2,7 +2,6 @@ package com.guyuuan.app.find_author.ui.screen.detail
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.model.ImageItem
@@ -12,11 +11,8 @@ import com.guyuuan.app.find_author.core.ui.UiState
 import com.ramcosta.composedestinations.generated.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 /**
@@ -29,14 +25,22 @@ class ImageDetailViewModel @Inject constructor(
     mediaRepository: MediaRepository, savedStateHandle: SavedStateHandle
 ) : BaseViewModel<ImageDetailUiState, ImageDetailUiEvent>() {
     private val pager = mediaRepository.getImages()
-    override val uiState: StateFlow<ImageDetailUiState> =
-        flow<ImageDetailUiState> {}.catch { emit(ImageDetailUiState.Error(it)) }.stateIn(
-                viewModelScope,
-                SharingStarted.Eagerly,
-                ImageDetailUiState.Success(pager, savedStateHandle.navArgs())
-            )
+    override val uiState: StateFlow<ImageDetailUiState>
+        get() = _uiState
+    private val _uiState =
+        MutableStateFlow(ImageDetailUiState.Success(pager, savedStateHandle.navArgs()))
+
 
     override suspend fun onEvent(event: ImageDetailUiEvent) {
+        when (event) {
+            is ImageDetailUiEvent.OnPageChange -> {
+                when(val state = uiState.value){
+                    is ImageDetailUiState.Success->{
+                        _uiState.emit(state.copy(currentImage = event.currentImage))
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -45,14 +49,17 @@ interface ImageDetailUiState : UiState {
 
     @Immutable
     data class Success(
-        val images: Flow<PagingData<ImageItem>>, val navArgs: ImageDetailScreenNavArgs
+        val images: Flow<PagingData<ImageItem>>, val navArgs: ImageDetailScreenNavArgs,
+        val currentImage: ImageItem?=null
     ) : ImageDetailUiState
 
     @Immutable
     data class Error(val throwable: Throwable) : ImageDetailUiState
 }
 
-interface ImageDetailUiEvent : UiEvent
+interface ImageDetailUiEvent : UiEvent {
+    data class OnPageChange(val currentImage: ImageItem) : ImageDetailUiEvent
+}
 
 
 

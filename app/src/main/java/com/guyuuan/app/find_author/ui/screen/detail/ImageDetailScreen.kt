@@ -6,6 +6,7 @@
 
 package com.guyuuan.app.find_author.ui.screen.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -14,11 +15,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.guyuuan.app.find_author.core.data.model.ImageItem
+import com.guyuuan.app.find_author.core.ui.base.MyApplicationTheme
 import com.guyuuan.app.find_author.core.ui.compoments.CoilImage
 import com.guyuuan.app.find_author.core.ui.util.Zero
 import com.ramcosta.composedestinations.annotation.Destination
@@ -54,54 +58,73 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
 data class ImageDetailScreenNavArgs(val targetIndex: Int = 0)
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Destination<RootGraph>(
     navArgs = ImageDetailScreenNavArgs::class
 )
 @Composable
 fun SharedTransitionScope.ImageDetailScreen(
-    navigator: DestinationsNavigator, viewModel: ImageDetailViewModel = hiltViewModel(),
+    navigator: DestinationsNavigator,
+    viewModel: ImageDetailViewModel = hiltViewModel(),
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    Scaffold(
-        topBar = { TopBar(modifier = Modifier, navigator = navigator) },
-        contentWindowInsets = WindowInsets.Zero
-    ) {
-        when (val state = uiState) {
-            is ImageDetailUiState.Success -> {
-                val images = state.images.collectAsLazyPagingItems()
-                ImageDetailPager(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = it.calculateTopPadding()),
-                    images = images,
-                    initialPage = state.navArgs.targetIndex,
-                    animatedVisibilityScope
-                )
-            }
-
-            is ImageDetailUiState.Error -> {
-                Text(
-                    state.throwable.toString(),
-                    modifier = Modifier,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-
-            else -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LinearProgressIndicator()
+    MyApplicationTheme(darkTheme = true) {
+        Scaffold(topBar = { TopBar(modifier = Modifier, navigator = navigator) },
+            contentWindowInsets = WindowInsets.Zero,
+            bottomBar = {
+                BottomBar()
+            }) {_->
+            when (val state = uiState) {
+                is ImageDetailUiState.Success -> {
+                    val images = state.images.collectAsLazyPagingItems()
+                    ImageDetailPager(
+                        modifier = Modifier.fillMaxSize(),
+                        images = images,
+                        initialPage = state.navArgs.targetIndex,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                    ) { index ->
+                        images[index]?.let { image ->
+                            viewModel.dispatch(
+                                ImageDetailUiEvent.OnPageChange(
+                                    image
+                                )
+                            )
+                        }
+                    }
                 }
-            }
 
+                is ImageDetailUiState.Error -> {
+                    Text(
+                        state.throwable.toString(),
+                        modifier = Modifier,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                else -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        LinearProgressIndicator()
+                    }
+                }
+
+            }
         }
     }
 }
 
+@Composable
+private fun BottomBar(modifier: Modifier = Modifier) {
+    BottomAppBar(modifier = modifier, containerColor = Color.Transparent) {
+        IconButton(onClick = {}) {
+            Icon(Icons.Default.Share, contentDescription = null)
+        }
+    }
+}
 
 @Composable
-fun TopBar(modifier: Modifier = Modifier, navigator: DestinationsNavigator) {
+private fun TopBar(modifier: Modifier = Modifier, navigator: DestinationsNavigator) {
     TopAppBar(modifier = modifier,
         title = { Text(text = "") },
         colors = TopAppBarDefaults.topAppBarColors().copy(containerColor = Color.Transparent),
@@ -119,9 +142,13 @@ private fun SharedTransitionScope.ImageDetailPager(
     modifier: Modifier = Modifier,
     images: LazyPagingItems<ImageItem>,
     initialPage: Int,
-    animatedVisibilityScope: AnimatedVisibilityScope
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    onPageChanged: (Int) -> Unit
 ) {
     val pagerState = rememberPagerState(initialPage = initialPage) { images.itemCount }
+    LaunchedEffect(pagerState.currentPage) {
+        onPageChanged(pagerState.currentPage)
+    }
     HorizontalPager(pagerState, modifier = modifier) { index ->
         images[index]?.let { image ->
             CoilImage(
@@ -136,7 +163,7 @@ private fun SharedTransitionScope.ImageDetailPager(
                             tween(durationMillis = 1000)
                         },
                     ),
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Crop,
                 contentDescription = null
             )
         }
