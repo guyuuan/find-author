@@ -16,9 +16,9 @@
 
 @Suppress("DSL_SCOPE_VIOLATION") // Remove when fixed https://youtrack.jetbrains.com/issue/KTIJ-19369
 plugins {
-    alias(libs.plugins.chitanda.android.app.compose)
-    alias(libs.plugins.chitanda.android.app)
-    alias(libs.plugins.chitanda.android.hilt)
+    alias(libs.plugins.guyuuan.android.app.compose)
+    alias(libs.plugins.guyuuan.android.app)
+    alias(libs.plugins.guyuuan.android.hilt)
     alias(libs.plugins.ksp)
 }
 
@@ -70,8 +70,10 @@ android {
 dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
+    implementation(project(":core:domain"))
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
 //

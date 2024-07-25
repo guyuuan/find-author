@@ -37,7 +37,9 @@ dependencyResolutionManagement {
 rootProject.name = "FindAuthor"
 
 include(":app")
+include(":core:common")
 include(":core:data")
+include(":core:domain")
 include(":core:database")
 include(":core:testing")
 include(":core:ui")

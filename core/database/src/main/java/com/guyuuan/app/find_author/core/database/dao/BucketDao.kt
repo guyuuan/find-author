@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.guyuuan.app.find_author.core.database.model.Bucket
+import com.guyuuan.app.find_author.core.database.model.BucketType
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -37,5 +38,8 @@ interface BucketDao {
     suspend fun updateBucket(vararg item: Bucket)
 
     @Query("SELECT * FROM bucket WHERE selected = 1 ORDER BY modifiedDate DESC")
-     fun getSelectedBuckets(): Flow<List<Bucket>>
+    fun getSelectedBuckets(): Flow<List<Bucket>>
+
+    @Query("SELECT type FROM bucket WHERE id = :bucketId")
+    suspend fun getBucketType(bucketId: Long): BucketType
 }

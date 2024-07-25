@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,56 +69,78 @@ fun SharedTransitionScope.ImageDetailScreen(
     viewModel: ImageDetailViewModel = hiltViewModel(),
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     MyApplicationTheme(darkTheme = true) {
         Scaffold(topBar = { TopBar(modifier = Modifier, navigator = navigator) },
             contentWindowInsets = WindowInsets.Zero,
             bottomBar = {
-                BottomBar()
-            }) {_->
-            when (val state = uiState) {
-                is ImageDetailUiState.Success -> {
-                    val images = state.images.collectAsLazyPagingItems()
-                    ImageDetailPager(
-                        modifier = Modifier.fillMaxSize(),
-                        images = images,
-                        initialPage = state.navArgs.targetIndex,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                    ) { index ->
-                        images[index]?.let { image ->
-                            viewModel.dispatch(
-                                ImageDetailUiEvent.OnPageChange(
-                                    image
-                                )
-                            )
-                        }
-                    }
-                }
-
-                is ImageDetailUiState.Error -> {
-                    Text(
-                        state.throwable.toString(),
-                        modifier = Modifier,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-
-                else -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        LinearProgressIndicator()
-                    }
-                }
-
-            }
+                BottomBar(onClickShare = {
+                    viewModel.dispatch(ImageDetailUiEvent.OnClickShare(context))
+                })
+            }) { _ ->
+            Body(
+                uiState = uiState,
+                viewModel = viewModel,
+                animatedVisibilityScope = animatedVisibilityScope
+            )
         }
     }
 }
 
 @Composable
-private fun BottomBar(modifier: Modifier = Modifier) {
+private fun SharedTransitionScope.Body(
+    modifier: Modifier = Modifier,
+    uiState: ImageDetailUiState,
+    viewModel: ImageDetailViewModel,
+    animatedVisibilityScope: AnimatedVisibilityScope
+) {
+    when (uiState) {
+        is ImageDetailUiState.Success -> {
+            val images = uiState.images.collectAsLazyPagingItems()
+            ImageDetailPager(
+                modifier = Modifier.fillMaxSize(),
+                images = images,
+                initialPage = uiState.navArgs.targetIndex,
+                animatedVisibilityScope = animatedVisibilityScope,
+            ) { index ->
+                if (index < images.itemCount) {
+                    images[index]?.let { image ->
+                        viewModel.dispatch(
+                            ImageDetailUiEvent.OnPageChange(
+                                image
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        is ImageDetailUiState.Error -> {
+            Text(
+                uiState.throwable.toString(),
+                modifier = Modifier,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        else -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LinearProgressIndicator()
+            }
+        }
+
+    }
+
+}
+
+@Composable
+private fun BottomBar(
+    modifier: Modifier = Modifier, onClickShare: () -> Unit
+) {
     BottomAppBar(modifier = modifier, containerColor = Color.Transparent) {
-        IconButton(onClick = {}) {
+        IconButton(onClick = onClickShare) {
             Icon(Icons.Default.Share, contentDescription = null)
         }
     }
@@ -146,8 +169,10 @@ private fun SharedTransitionScope.ImageDetailPager(
     onPageChanged: (Int) -> Unit
 ) {
     val pagerState = rememberPagerState(initialPage = initialPage) { images.itemCount }
-    LaunchedEffect(pagerState.currentPage) {
-        onPageChanged(pagerState.currentPage)
+    LaunchedEffect(pagerState.currentPage, images.itemCount) {
+        if (images.itemCount > 0) {
+            onPageChanged(pagerState.currentPage)
+        }
     }
     HorizontalPager(pagerState, modifier = modifier) { index ->
         images[index]?.let { image ->
@@ -163,7 +188,7 @@ private fun SharedTransitionScope.ImageDetailPager(
                             tween(durationMillis = 1000)
                         },
                     ),
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.FillWidth,
                 contentDescription = null
             )
         }
