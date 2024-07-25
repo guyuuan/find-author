@@ -9,6 +9,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /**
  * @author: guyuuan
@@ -26,6 +27,7 @@ abstract class BaseViewModel<State : UiState, Event : UiEvent> : ViewModel() {
                 onEvent(event)
                 withContext(Dispatchers.Main) { event.onSuccess?.invoke() }
             } catch (e: Exception) {
+                Timber.e(e)
                 withContext(Dispatchers.Main) { event.onFailed?.invoke(e) }
             }
         }

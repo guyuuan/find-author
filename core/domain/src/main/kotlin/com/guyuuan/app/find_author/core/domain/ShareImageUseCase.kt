@@ -25,7 +25,10 @@ class ShareImageUseCase @Inject constructor(
         val bucketType = bucket.type
         val file = context.contentResolver.openInputStream(image.uri.toUri())?.use {
             val cacheDir = context.externalCacheDir ?: context.cacheDir
-            val file = File(cacheDir, "images${File.separatorChar}${bucket.name}${File.separatorChar}${image.name}")
+            val dir = File(cacheDir, "images${File.separatorChar}${bucket.name}${File.separatorChar}")
+            dir.mkdirs()
+            val file = File(dir, image.name)
+            file.createNewFile()
             val out = file.outputStream()
             it.copyTo(out)
             out.close()
