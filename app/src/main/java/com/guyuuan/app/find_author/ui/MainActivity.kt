@@ -17,24 +17,41 @@
 package com.guyuuan.app.find_author.ui
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.datastore.core.DataStore
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.guyuuan.app.find_author.core.datastore.proto.AppConfig
 import com.guyuuan.app.find_author.core.ui.base.MyApplicationTheme
 import com.guyuuan.app.find_author.core.ui.compoments.App
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 private const val TAG = "MainActivity"
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen().setKeepOnScreenCondition {
+            viewModel.config.value == null
+        }
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
-                App { padding, navController ->
+                App { padding, _ ->
                     MainNavigation(
                         modifier = Modifier.padding(padding)
                     )
@@ -42,4 +59,11 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    dataStore: DataStore<AppConfig>
+) : ViewModel() {
+    val config = dataStore.data.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 }

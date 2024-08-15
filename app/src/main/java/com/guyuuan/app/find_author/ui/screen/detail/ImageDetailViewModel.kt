@@ -3,7 +3,9 @@ package com.guyuuan.app.find_author.ui.screen.detail
 import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.guyuuan.app.find_author.core.data.MediaRepository
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.domain.ShareImageUseCase
@@ -12,9 +14,11 @@ import com.guyuuan.app.find_author.core.ui.UiEvent
 import com.guyuuan.app.find_author.core.ui.UiState
 import com.ramcosta.composedestinations.generated.navArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 /**
@@ -24,10 +28,11 @@ import javax.inject.Inject
  **/
 @HiltViewModel
 class ImageDetailViewModel @Inject constructor(
-    mediaRepository: MediaRepository, savedStateHandle: SavedStateHandle,
+    mediaRepository: MediaRepository,
+    savedStateHandle: SavedStateHandle,
     private val shareImageUseCase: ShareImageUseCase
 ) : BaseViewModel<ImageDetailUiState, ImageDetailUiEvent>() {
-    private val pager = mediaRepository.getImages()
+    private val pager = mediaRepository.getImages().flowOn(Dispatchers.IO).cachedIn(viewModelScope)
     override val uiState: StateFlow<ImageDetailUiState>
         get() = _uiState
     private val _uiState =
@@ -62,7 +67,8 @@ interface ImageDetailUiState : UiState {
 
     @Immutable
     data class Success(
-        val images: Flow<PagingData<ImageItem>>, val navArgs: ImageDetailScreenNavArgs,
+        val images: Flow<PagingData<ImageItem>>,
+        val navArgs: ImageDetailScreenNavArgs,
         val currentImage: ImageItem? = null
     ) : ImageDetailUiState
 

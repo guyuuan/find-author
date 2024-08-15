@@ -6,11 +6,8 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -44,7 +41,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.guyuuan.app.find_author.core.data.model.ImageItem
 import com.guyuuan.app.find_author.core.data.model.PagingUiMode
 import com.guyuuan.app.find_author.core.ui.compoments.CoilImage
-import com.guyuuan.app.find_author.core.ui.compoments.TransformBox
 import com.guyuuan.app.find_author.core.ui.util.plus
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -145,48 +141,35 @@ private fun SharedTransitionScope.ImageGrid(
             val image = images[index] ?: return@items
             when (image) {
                 is PagingUiMode.Item -> {
-                    TransformBox(
+                    ImageGridItem(
                         modifier = Modifier
+                            .animateItem()
                             .fillMaxWidth()
                             .aspectRatio(1f)
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable {
+                                onImageClick(image.realIndex)
+                            }
                             .sharedElement(
-                                rememberSharedContentState(image.realIndex),
-                                animatedVisibilityScope
-                            ),
-                        enter = scaleIn(),
-                        exit = scaleOut(),
-                        key = image.data.id,
-                    ) {
-                        ImageGridItem(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(MaterialTheme.shapes.small)
-                                .clickable {
-                                    onImageClick(image.realIndex)
+                                rememberSharedContentState(key = "image/${image.realIndex}"),
+                                animatedVisibilityScope,
+                                boundsTransform = { _, _ ->
+                                    tween(durationMillis = 1000)
                                 }
-                                .sharedElement(
-                                    rememberSharedContentState(key = "image/${image.realIndex}"),
-                                    animatedVisibilityScope,
-                                    boundsTransform = { _, _ ->
-                                        tween(durationMillis = 1000)
-                                    }
-                                ),
-                            image = image.data,
-                        )
-                    }
+                            ),
+                        image = image.data,
+                    )
                 }
 
-                is PagingUiMode.Header -> TransformBox(
-                    key = image.timeString,
-                    modifier = Modifier.fillMaxWidth(),
-                    delay = 100,
-                ) {
+                is PagingUiMode.Header ->
                     Text(
                         image.timeString,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = 24.dp)
+                        modifier = Modifier
+                            .animateItem()
+                            .padding(top = 24.dp)
                     )
-                }
+
             }
 
         }

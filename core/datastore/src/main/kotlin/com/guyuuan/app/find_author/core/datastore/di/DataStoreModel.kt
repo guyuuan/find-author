@@ -11,6 +11,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import androidx.datastore.dataStoreFile
+import javax.inject.Singleton
+
 /**
  * @author: guyuuan
  * @createTime: 6/24/24 15:28
@@ -21,6 +23,7 @@ import androidx.datastore.dataStoreFile
 object DataStoreModel {
 
     @Provides
+    @Singleton
     fun provideAppConfigDataStore(
         @ApplicationContext context: Context,
         serializer: AppConfigSerializer

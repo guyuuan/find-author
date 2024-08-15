@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +28,8 @@ import javax.inject.Inject
 class ChooseBucketsViewModel @Inject constructor(
     private val mediaRepository: MediaRepository
 ) : BaseViewModel<ChooseBucketsUiState, ChooseBucketsEvent>() {
-    private val pager = mediaRepository.getPagingBuckets().flow.cachedIn(viewModelScope)
+    private val pager =
+        mediaRepository.getPagingBuckets().flow.flowOn(Dispatchers.IO).cachedIn(viewModelScope)
     override val uiState: StateFlow<ChooseBucketsUiState> = flow<ChooseBucketsUiState> {
         emit(ChooseBucketsUiState.Success(pager))
     }.stateIn(
