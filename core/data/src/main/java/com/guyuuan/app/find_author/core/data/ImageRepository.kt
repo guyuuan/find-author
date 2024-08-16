@@ -36,8 +36,10 @@ interface ImageRepository {
     fun getAllImages(): Flow<List<Image>>
 
     suspend fun checkImageShouldUpdate(image: Image)
+
     suspend fun updateImage(vararg image: Image)
-    fun getImagesByBucket(
+
+    fun getImagesPagerByBucket(
         bucketId: Long, config: PagingConfig = PagingConfig(pageSize = 30)
     ): Pager<Int, ImageItem>
 
@@ -63,8 +65,8 @@ class DefaultImageRepository @Inject constructor(
 
     override fun getAllImages() = imageDao.getImages()
 
-    override fun getImagesByBucket(bucketId: Long, config: PagingConfig) = Pager(config = config) {
-        imageDao.getBuketImages(bucketId)
+    override fun getImagesPagerByBucket(bucketId: Long, config: PagingConfig) = Pager(config = config) {
+        imageDao.getBuketImagesPager(bucketId)
     }
 
     override fun getHomeImages(

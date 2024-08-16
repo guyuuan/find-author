@@ -2,11 +2,16 @@ package com.guyuuan.app.find_author.core.data
 
 import com.guyuuan.app.find_author.core.data.media.MediaScanner
 import com.guyuuan.app.find_author.core.data.media.ScanStatus
-import com.guyuuan.app.find_author.core.data.model.BucketItem
 import com.guyuuan.app.find_author.core.database.model.Bucket
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.zip
 import javax.inject.Inject
 
 /**
@@ -17,7 +22,7 @@ import javax.inject.Inject
 interface MediaRepository : BucketRepository, ImageRepository {
     suspend fun loadSystemBuckets()
 
-    fun loadBucketsImages(): Flow<ScanStatus<Bucket>>
+    fun loadBucketsImages(coroutineScope: CoroutineScope): Flow<ScanStatus<Bucket>>
 }
 
 class DefaultMediaRepository @Inject constructor(
@@ -36,10 +41,15 @@ class DefaultMediaRepository @Inject constructor(
         }
     }
 
-    override fun loadBucketsImages() = with(scanner) {
-        getSelectedBuckets().scamImages {
+    override fun loadBucketsImages(coroutineScope: CoroutineScope) = with(scanner) {
+        val buckets = getSelectedBuckets().shareIn(
+            coroutineScope, SharingStarted.WhileSubscribed(), replay = 1
+        )
+        val scan = buckets.scamImages {
             checkImageShouldUpdate(it)
-        }.flowOn(Dispatchers.IO)
+        }
+        val check = buckets.checkImagesExist().stateIn(coroutineScope, SharingStarted.Eagerly, Unit)
+        scan.flowOn(Dispatchers.IO)
     }
 
 

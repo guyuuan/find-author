@@ -34,7 +34,8 @@ class HomeViewModel @Inject constructor(
     private val pager =
         mediaRepository.getHomeImages().flowOn(Dispatchers.Default).cachedIn(viewModelScope)
     override val uiState: StateFlow<HomeUiState> =
-        mediaRepository.loadBucketsImages().map<ScanStatus<BucketItem>, HomeUiState> { scanStatus ->
+        mediaRepository.loadBucketsImages(viewModelScope).map<ScanStatus<BucketItem>, HomeUiState> {
+            scanStatus ->
             HomeUiState.Success(
                 images = pager, scanStatus = scanStatus
             )

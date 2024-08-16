@@ -1,11 +1,9 @@
 package com.guyuuan.app.find_author.core.database.dao
 
-import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.guyuuan.app.find_author.core.database.model.Image
@@ -22,16 +20,26 @@ interface ImageDao {
     fun getImages(): Flow<List<Image>>
 
     @Query("SELECT * FROM image WHERE id = :id")
-   suspend fun getImageById(id:String):Image?
+    suspend fun getImageById(id: String): Image?
 
     @Insert()
-    suspend fun insertImage( vararg item: Image)
+    suspend fun insertImage(vararg item: Image)
 
     @Update
     suspend fun updateImage(vararg item: Image)
 
     @Query("SELECT * FROM image WHERE bucketId = :bucketId ORDER BY dateAdded DESC")
-    fun getBuketImages(bucketId: Long): PagingSource<Int,Image>
+    fun getBuketImagesPager(bucketId: Long): PagingSource<Int, Image>
+
+    @Query("SELECT * FROM image WHERE bucketId = :bucketId ORDER BY dateAdded DESC LIMIT 1 OFFSET" +
+            " :offset")
+    fun getBucketImage(bucketId: Long, offset: Int): Image
+
+    @Query("SELECT COUNT(*) FROM image WHERE bucketId = :bucketId")
+    fun getBucketImageCount(bucketId: Long): Int
+
+    @Delete
+    suspend fun deleteImage(vararg image: Image)
 
     @Query("DELETE FROM image WHERE bucketId = :bucketId")
     suspend fun deleteBucketImage(bucketId: Long)
@@ -40,5 +48,5 @@ interface ImageDao {
     fun getBuketCover(bucketId: Long): Image?
 
     @Query("SELECT image.* FROM image INNER JOIN bucket ON image.bucketId = bucket.id WHERE (bucket.hide = :showHide OR bucket.hide =0 ) AND bucket.selected = 1 ORDER BY dateAdded DESC")
-    fun getHomeImages(showHide:Boolean): PagingSource<Int, Image>
+    fun getHomeImages(showHide: Boolean): PagingSource<Int, Image>
 }
